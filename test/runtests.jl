@@ -1,4 +1,4 @@
-using TreePlots
+using BasicTreePlots
 using Test
 
 #=

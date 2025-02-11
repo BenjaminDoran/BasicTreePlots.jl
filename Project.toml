@@ -1,4 +1,4 @@
-name = "TreePlots"
+name = "BasicTreePlots"
 uuid = "523fa316-3eda-45c7-ad2f-0d13a1dc3d77"
 authors = ["Benjamin Doran and collaborators"]
 version = "0.1.0"
@@ -13,8 +13,8 @@ Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 NewickTree = "b0a14db8-6308-4ebc-8917-f72cd81f5094"
 
 [extensions]
-TreePlotsMakieExt = "Makie"
-TreePlotsNewickTreeExt = "NewickTree"
+BasicTreePlotsMakieExt = "Makie"
+BasicTreePlotsNewickTreeExt = "NewickTree"
 
 [compat]
 AbstractTrees = "0.4"

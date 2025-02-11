@@ -1,4 +1,4 @@
-module TreePlots
+module BasicTreePlots
 
 using Reexport: Reexport
 using Statistics: mean
@@ -20,10 +20,10 @@ export treeplot, treeplot!
 
 # Keyword arguments:
 
-- `showroot::Bool = false`, if `TreePlots.distance()` is not `nan` for root, show line linking root to parent.
+- `showroot::Bool = false`, if `BasicTreePlots.distance()` is not `nan` for root, show line linking root to parent.
 
 - `layoutstyle::Symbol = :dendrogram` available options are `:dendrogram`, or `:cladogram`
-    -  `:dendrogram` displays tree taking into account the distance between parent and children nodes as calculated from `TreePlots.distance(node)`.
+    -  `:dendrogram` displays tree taking into account the distance between parent and children nodes as calculated from `BasicTreePlots.distance(node)`.
         If the distance is not defined, it defaults to `1` and is equivalent to the `:cladogram` layout
     - `:cladogram` displays the tree where each distance from a child node to their parent is set to `1`.
 
@@ -75,7 +75,7 @@ function treeplot! end
 
 return scaler distance from node to parent of node. Defaults to `1`
 
-To extend `treeplot` to your type define method for `TreePlots.distance(node::YourNodeType)`
+To extend `treeplot` to your type define method for `BasicTreePlots.distance(node::YourNodeType)`
 """
 distance() = 1
 distance(node) = 1
@@ -87,7 +87,7 @@ return string typed value or description of node.
 
 Defaults to `string(nodevalue(node))`
 
-To extend `treeplot` to your type define method for `TreePlots.label(node::YourNodeType)`
+To extend `treeplot` to your type define method for `BasicTreePlots.label(node::YourNodeType)`
 """
 label(n) = string(nodevalue(n))
 

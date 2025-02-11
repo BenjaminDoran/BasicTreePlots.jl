@@ -71,6 +71,6 @@ jobs:
         shell: julia --project=docs --color=yes {0}
         run: |
           using Documenter: DocMeta, doctest
-          using TreePlots
-          DocMeta.setdocmeta!(TreePlots, :DocTestSetup, :(using TreePlots); recursive=true)
-          doctest(TreePlots)
+          using BasicTreePlots
+          DocMeta.setdocmeta!(BasicTreePlots, :DocTestSetup, :(using BasicTreePlots); recursive=true)
+          doctest(BasicTreePlots)

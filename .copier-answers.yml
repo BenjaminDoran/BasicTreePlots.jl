@@ -11,7 +11,7 @@ JuliaMinVersion: '1.9'
 License: MIT
 LicenseCopyrightHolders: Benjamin Doran and collaborators
 MarkdownIndentation: 2
-PackageName: TreePlots
+PackageName: BasicTreePlots
 PackageOwner: BenjaminDoran
 PackageUUID: 523fa316-3eda-45c7-ad2f-0d13a1dc3d77
 RunJuliaNightlyOnCI: false

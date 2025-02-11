@@ -14,14 +14,14 @@ if "--liveserver" ∈ ARGS
     Revise.revise()
 end
 
-using Literate, TreePlots
+using Literate, BasicTreePlots
 using Documenter
 
 dto = TimerOutput()
 reset_timer!(dto)
 
 const ORG_NAME = "BenjaminDoran"
-const PACKAGE_NAME = "TreePlots.jl"
+const PACKAGE_NAME = "BasicTreePlots.jl"
 const repo_root = dirname(@__DIR__)
 const is_ci = haskey(ENV, "GITHUB_ACTIONS")
 const TUTORIALS_IN = joinpath(@__DIR__, "src", "literate-tutorials")
@@ -44,7 +44,12 @@ end
 function main(ARGS)
     args = parse_args(ARGS)
 
-    DocMeta.setdocmeta!(TreePlots, :DocTestSetup, :(using TreePlots); recursive = true)
+    DocMeta.setdocmeta!(
+        BasicTreePlots,
+        :DocTestSetup,
+        :(using BasicTreePlots);
+        recursive = true,
+    )
 
     # Generate change log
     _create_documenter_changelog()
@@ -84,7 +89,7 @@ function main(ARGS)
     ]
 
     makedocs(;
-        modules = [TreePlots],
+        modules = [BasicTreePlots],
         authors = "Benjamin Doran and collaborators",
         repo = "https://github.com/$ORG_NAME/$PACKAGE_NAME/blob/{commit}{path}#{line}",
         sitename = PACKAGE_NAME,
@@ -167,7 +172,7 @@ function _create_documenter_changelog()
     content = replace(
         content,
         r"(\[#(\d+)\])\[github-\d+\]" =>
-            s"\1(https://github.com/BenjaminDoran/TreePlots.jl/pull/\2)",
+            s"\1(https://github.com/BenjaminDoran/BasicTreePlots.jl/pull/\2)",
     )
     # Remove all links at the bottom
     content = replace(content, r"^<!-- Release links -->.*$"ms => "")
