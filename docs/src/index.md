@@ -1,16 +1,16 @@
 ```@meta
-CurrentModule = TreePlots
+CurrentModule = BasicTreePlots
 ```
 
-# TreePlots
+# BasicTreePlots
 
-Documentation for [TreePlots](https://github.com/BenjaminDoran/TreePlots.jl).
+Documentation for [BasicTreePlots](https://github.com/BenjaminDoran/BasicTreePlots.jl).
 
 This is a package that aims to provide generic plotting recipes for tree like data structures.
 As such the recipes should only require that your data structure fulfills the AbstractTrees interface,
 i.e. has `AbstractTrees.children(YourType)` defined.
 
-Optionally, `TreePlots.distance(YourType)` and `TreePlots.label(YourType)` can be defined to allow plotting trees
+Optionally, `BasicTreePlots.distance(YourType)` and `BasicTreePlots.label(YourType)` can be defined to allow plotting trees
 with variable distances between children and parent nodes and pretty printing of each node in the tree respectively.
 
 Currently, we only provide `Makie.jl` backends, but are interested in contributions for recipes for `Plots.jl` and `TidyPlots.jl`.
@@ -21,13 +21,20 @@ See the `ext` folder for example extensions.
 
 ```{julia}
 using Pkg
-Pkg.add("https://github.com/BenjaminDoran/TreePlots.jl.git")
+Pkg.add("BasicTreePlots")
+```
+
+Or the development version with
+
+```{julia}
+using Pkg
+Pkg.add("https://github.com/BenjaminDoran/BasicTreePlots.jl.git")
 ```
 
 ## Basic usage
 
 ```{julia}
-using CairoMakie, TreePlots
+using CairoMakie, BasicTreePlots
 tree = ((:a, :b), (:c, :d))
 treeplot(tree)
 ```

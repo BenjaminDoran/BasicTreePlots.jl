@@ -4,7 +4,7 @@
 basic setup
 =#
 
-using CairoMakie, TreePlots
+using CairoMakie, BasicTreePlots
 using AbstractTrees
 update_theme!(Theme(size = (500, 500)))
 

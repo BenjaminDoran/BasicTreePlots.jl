@@ -10,9 +10,9 @@ body:
 
         Please, before submitting, make sure that:
 
-        - There is not an [existing issue](https://github.com/BenjaminDoran/TreePlots.jl/issues) with the same question
-        - You have read the [contributing guide](https://BenjaminDoran.github.io/TreePlots.jl/dev/90-contributing/)
-        - You are following the [code of conduct](https://github.com/BenjaminDoran/TreePlots.jl/blob/main/CODE_OF_CONDUCT.md)
+        - There is not an [existing issue](https://github.com/BenjaminDoran/BasicTreePlots.jl/issues) with the same question
+        - You have read the [contributing guide](https://BenjaminDoran.github.io/BasicTreePlots.jl/dev/90-contributing/)
+        - You are following the [code of conduct](https://github.com/BenjaminDoran/BasicTreePlots.jl/blob/main/CODE_OF_CONDUCT.md)
         The form below should help you in filling out this issue.
   - type: textarea
     id: description

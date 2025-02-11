@@ -1,7 +1,7 @@
-module TreePlotsMakieExt
+module BasicTreePlotsMakieExt
 
-import TreePlots
-import TreePlots: treeplot, treeplot!
+import BasicTreePlots
+import BasicTreePlots: treeplot, treeplot!
 
 import Makie
 import Makie: Point2f
@@ -35,17 +35,17 @@ Makie.@recipe(TreePlot, tree) do scene
 end
 
 function Makie.plot!(plt::TreePlot)
-    nleaves = TreePlots.leafcount(plt.tree[])
+    nleaves = BasicTreePlots.leafcount(plt.tree[])
     toangle(y) = (y / (nleaves)) * (2π - (plt.openangle[] % 2pi))
 
     ## Setup tree layout
-    nodecoords = TreePlots.nodepositions(
+    nodecoords = BasicTreePlots.nodepositions(
         plt.tree[];
         showroot = plt.showroot[],
         layoutstyle = plt.layoutstyle[],
     )
     maxleafposition = argmax(x -> x[1], values(nodecoords))
-    segs = TreePlots.makesegments(
+    segs = BasicTreePlots.makesegments(
         nodecoords,
         plt.tree[];
         resolution = plt.branch_point_resolution[],
@@ -86,7 +86,7 @@ function Makie.plot!(plt::TreePlot)
     )
 
     ## Get all tip positions and labels
-    tippositions_start, tiplabels = TreePlots.tipannotations(nodecoords)
+    tippositions_start, tiplabels = BasicTreePlots.tipannotations(nodecoords)
 
     ## Lines from each tip to max tip depth
     if plt.usemaxdepth[]

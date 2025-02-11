@@ -1,5 +1,5 @@
-using Aqua, TreePlots
+using Aqua, BasicTreePlots
 
-@testset "TreePlots.jl" begin
-    Aqua.test_all(TreePlots)
+@testset "BasicTreePlots.jl" begin
+    Aqua.test_all(BasicTreePlots)
 end
