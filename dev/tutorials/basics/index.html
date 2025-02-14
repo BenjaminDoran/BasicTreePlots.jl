@@ -39,15 +39,15 @@ treeplot!(tree; linecolor = branchcolors, tipfontsize = 12)
 fig</code></pre><img src="c8f90647.png" alt="Example block output"/><p>For instance if we have external data about each node in the tree</p><pre><code class="language-julia hljs">tree_data = Dict(
     node =&gt; (; support = rand(), favorite_number = rand(1:5)) for node in PreOrderDFS(tree)
 )</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Dict{Any, @NamedTuple{support::Float64, favorite_number::Int64}} with 9 entries:
-  :a                         =&gt; (support = 0.247816, favorite_number = 4)
-  :b                         =&gt; (support = 0.924408, favorite_number = 1)
-  (:a, :b)                   =&gt; (support = 0.937422, favorite_number = 3)
-  (:c, (:d, :e))             =&gt; (support = 0.217476, favorite_number = 4)
-  :d                         =&gt; (support = 0.210689, favorite_number = 5)
-  :e                         =&gt; (support = 0.362542, favorite_number = 5)
-  :c                         =&gt; (support = 0.396378, favorite_number = 2)
-  (:d, :e)                   =&gt; (support = 0.920986, favorite_number = 4)
-  ((:a, :b), (:c, (:d, :e))) =&gt; (support = 0.344936, favorite_number = 2)</code></pre><p>then we can plot support as the color and the favorite number as the line width.</p><pre><code class="language-julia hljs">branchcolors = map(PreOrderDFS(tree)) do node
+  :a                         =&gt; (support = 0.0337978, favorite_number = 3)
+  :b                         =&gt; (support = 0.376219, favorite_number = 4)
+  (:a, :b)                   =&gt; (support = 0.768352, favorite_number = 1)
+  (:c, (:d, :e))             =&gt; (support = 0.451249, favorite_number = 4)
+  :d                         =&gt; (support = 0.576121, favorite_number = 5)
+  :e                         =&gt; (support = 0.0131166, favorite_number = 2)
+  :c                         =&gt; (support = 0.0054367, favorite_number = 5)
+  (:d, :e)                   =&gt; (support = 0.554339, favorite_number = 2)
+  ((:a, :b), (:c, (:d, :e))) =&gt; (support = 0.0334872, favorite_number = 5)</code></pre><p>then we can plot support as the color and the favorite number as the line width.</p><pre><code class="language-julia hljs">branchcolors = map(PreOrderDFS(tree)) do node
     tree_data[node].support
 end
 
@@ -61,7 +61,7 @@ hidedecorations!(ax)
 hidespines!(ax)
 p = treeplot!(tree; linecolor = branchcolors, linewidth = branchwidths, tipfontsize = 12)
 Colorbar(fig[1, 2][3, 1], p)
-fig</code></pre><img src="32d5e338.png" alt="Example block output"/><p>if we have too many leaf tips to read their labels anyway we can turn off the label visibility</p><pre><code class="language-julia hljs">fig = Figure()
+fig</code></pre><img src="7aaf4289.png" alt="Example block output"/><p>if we have too many leaf tips to read their labels anyway we can turn off the label visibility</p><pre><code class="language-julia hljs">fig = Figure()
 ax = PolarAxis(fig[1, 1], rautolimitmargin = (0.0, 0.1))
 hidedecorations!(ax)
 hidespines!(ax)
@@ -73,7 +73,7 @@ p = treeplot!(
     tipannotationsvisible = false,
 )
 Colorbar(fig[1, 2][3, 1], p)
-fig</code></pre><img src="9f0e79ba.png" alt="Example block output"/><p>For a PolarAxis, We can also control the span across which the tree is plotted. with the <code>openangle</code> parameter</p><pre><code class="language-julia hljs">fig = Figure()
+fig</code></pre><img src="f6d29294.png" alt="Example block output"/><p>For a PolarAxis, We can also control the span across which the tree is plotted. with the <code>openangle</code> parameter</p><pre><code class="language-julia hljs">fig = Figure()
 ax = PolarAxis(fig[1, 1], rautolimitmargin = (0.0, 0.1))
 hidedecorations!(ax)
 hidespines!(ax)
@@ -85,4 +85,4 @@ p = treeplot!(
     openangle = deg2rad(140),
 )
 Colorbar(fig[1, 2][3, 1], p)
-fig</code></pre><img src="0d4e5e05.png" alt="Example block output"/><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../">« Home</a><a class="docs-footer-nextpage" href="../../gallery/simple_phylogeny/">Simple example of plotting a phylogeny »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.8.1 on <span class="colophon-date" title="Friday 14 February 2025 01:13">Friday 14 February 2025</span>. Using Julia version 1.11.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+fig</code></pre><img src="7526b1d6.png" alt="Example block output"/><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../">« Home</a><a class="docs-footer-nextpage" href="../../gallery/simple_phylogeny/">Simple example of plotting a phylogeny »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.8.1 on <span class="colophon-date" title="Friday 14 February 2025 01:14">Friday 14 February 2025</span>. Using Julia version 1.11.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
