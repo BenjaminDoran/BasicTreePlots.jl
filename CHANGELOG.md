@@ -1,4 +1,5 @@
 [unreleased]
+- updated Makie Compath to include v0.22 ([#7])
 
 [0.1.0] | 2025-02-09
 
