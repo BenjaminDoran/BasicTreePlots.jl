@@ -1,7 +1,7 @@
 module BasicTreePlotsMakieExt
 
 import BasicTreePlots
-import BasicTreePlots: treeplot, treeplot!
+import BasicTreePlots: treeplot, treeplot!, treescatter, treescatter!
 
 import Makie
 import Makie: Point2f
@@ -17,10 +17,6 @@ Makie.@recipe(TreePlot, tree) do scene
         linewidth = @something(Makie.theme(scene, :linewidth), 1),
         linecolormap = @something(Makie.theme(scene, :colormap), :viridis),
         branch_point_resolution = 25,
-        markervisible = false,
-        markercolor = @something(Makie.theme(scene, :color), :black),
-        markersize = @something(Makie.theme(scene, :markersize), 5),
-        markercolormap = @something(Makie.theme(scene, :colormap), :viridis),
         usemaxdepth = false,
         tipannotationsvisible = true,
         tipannotations = nothing,
@@ -141,6 +137,48 @@ function Makie.plot!(plt::TreePlot)
             Makie.shared_attributes(plt, Makie.Text)...,
         )
     end
+end
+
+Makie.@recipe(TreeScatter, tree) do scene
+    attr = Makie.Attributes(
+        alpha = @something(Makie.theme(scene, :alpha), 1.0),
+        showroot = false,
+        layoutstyle = :dendrogram,
+        marker = @something(Makie.theme(scene, :marker), :circle),
+        markercolor = @something(Makie.theme(scene, :color), :black),
+        markersize = @something(Makie.theme(scene, :markersize), 5),
+        openangle = 0,
+    )
+    Makie.MakieCore.generic_plot_attributes!(attr)
+    return Makie.MakieCore.colormap_attributes!(attr, Makie.theme(scene, :colormap))
+end
+
+function Makie.plot!(plt::TreeScatter)
+    nleaves = BasicTreePlots.leafcount(plt.tree[])
+    toangle(y) = (y / (nleaves)) * (2π - (plt.openangle[] % 2pi))
+
+    ## Setup tree layout
+    nodecoords = BasicTreePlots.nodepositions(
+        plt.tree[];
+        showroot = plt.showroot[],
+        layoutstyle = plt.layoutstyle[],
+    )
+
+    ## Transform coordinate if plotting in Polar Axis
+    if occursin("Polar", string(plt.transformation.transform_func[]))
+        nodecoords = Dict(node => (toangle(y), x) for (node, (x, y)) in nodecoords)
+    end
+
+    ## Add markers in nodes
+    return Makie.scatter!(
+        plt,
+        collect(values(nodecoords)),
+        alpha = plt.alpha[],
+        marker = plt.marker[],
+        markersize = plt.markersize[],
+        color = plt.markercolor[],
+        colormap = plt.colormap[],
+    )
 end
 
 theme_empty() = Makie.Theme(
