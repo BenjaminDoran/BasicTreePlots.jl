@@ -8,7 +8,7 @@ using AbstractTrees: nodevalue, children, PreOrderDFS
 const LAYOUTS = (:dendrogram, :cladogram, :radial)
 const BRANCHTYPES = (:square, :straight)
 
-export treeplot, treeplot!
+export treeplot, treeplot!, treescatter, treescatter!
 
 """
     treeplot(tree; kwargs...)
@@ -67,6 +67,39 @@ export treeplot, treeplot!
 """
 function treeplot end
 function treeplot! end
+
+
+"""
+    treescatter(tree, kwargs...)
+
+# Args:
+
+- tree, the root node of a tree that has `AbstractTrees.children()` defined.
+    All nodes should be reachable by using `AbstractTrees.PreOrderDFS()` iterator.
+
+# Keyword arguments:
+
+- `alpha::AbstractFloat = 1.0`, the alpha value of the colormap or color attribute. Multiple alphas like in `treescatter(alpha=0.2, color=(:red, 0.5))`, will get multiplied.
+
+- `showroot::Bool = false`, if `BasicTreePlots.distance()` is not `nan` for root, show line linking root to parent.
+
+- `layoutstyle::Symbol = :dendrogram` available options are `:dendrogram`, or `:cladogram`
+    -  `:dendrogram` displays tree taking into account the distance between parent and children nodes as calculated from `BasicTreePlots.distance(node)`.
+        If the distance is not defined, it defaults to `1` and is equivalent to the `:cladogram` layout
+    - `:cladogram` displays the tree where each distance from a child node to their parent is set to `1`.
+
+- `marker::Symbol = :circle`, sets the scatter marker shape.
+
+- `markercolor = :black`, sets the scatter marker color.
+
+- `markersize = 5`, sets the scatter marker size.
+
+- `openangle = 0`, Angle in radians that limits span of tree around the circle when plotted on `PolarAxis`.
+    if `openangle = deg2rad(5)` then leaf tips will spread across angles `0` to `(2π - openangle)`.
+
+"""
+function treescatter end
+function treescatter! end
 
 # public distance, label
 
