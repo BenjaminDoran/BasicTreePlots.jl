@@ -76,6 +76,16 @@ hidespines!(ax)
 treeplot!(tree; linecolor = branchcolors, tipfontsize = 12)
 fig
 
+# or employ markers in the nodes to showcase the tree's information
+
+fig = Figure()
+ax = PolarAxis(fig[1, 1], rautolimitmargin = (0.0, 0.1))
+hidedecorations!(ax)
+hidespines!(ax)
+treeplot!(tree; tipfontsize = 12)
+treescatter!(tree; markercolor = branchcolors)
+fig
+
 # For instance if we have external data about each node in the tree
 
 tree_data = Dict(
