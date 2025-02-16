@@ -6,6 +6,9 @@ import BasicTreePlots: treeplot, treeplot!, treescatter, treescatter!
 import Makie
 import Makie: Point2f
 
+import AbstractTrees
+import AbstractTrees: PreOrderDFS
+
 Makie.@recipe(TreePlot, tree) do scene
     attr = Makie.Attributes(
         showroot = false,
@@ -147,6 +150,7 @@ Makie.@recipe(TreeScatter, tree) do scene
         marker = @something(Makie.theme(scene, :marker), :circle),
         markercolor = @something(Makie.theme(scene, :color), :black),
         markersize = @something(Makie.theme(scene, :markersize), 5),
+        nodeordering = AbstractTrees.PreOrderDFS,
         openangle = 0,
     )
     Makie.MakieCore.generic_plot_attributes!(attr)
@@ -170,14 +174,14 @@ function Makie.plot!(plt::TreeScatter)
     end
 
     ## Add markers in nodes
-    return Makie.scatter!(
+    Makie.scatter!(
         plt,
-        collect(values(nodecoords)),
+        [nodecoords[node] for node in plt.nodeordering[](plt.tree[])],
         alpha = plt.alpha[],
         marker = plt.marker[],
         markersize = plt.markersize[],
         color = plt.markercolor[],
-        colormap = plt.colormap[],
+        colormap = plt.colormap[];
     )
 end
 
