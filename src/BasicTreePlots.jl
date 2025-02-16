@@ -94,8 +94,12 @@ function treeplot! end
 
 - `markersize = 5`, sets the scatter marker size.
 
+- `nodeordering = AbstractTrees.PreOrderDFS`, function that informs algorithm which is the ordering of attributes
+    `marker`, `markercolor`, and `markersize`.
+
 - `openangle = 0`, Angle in radians that limits span of tree around the circle when plotted on `PolarAxis`.
     if `openangle = deg2rad(5)` then leaf tips will spread across angles `0` to `(2π - openangle)`.
+
 
 """
 function treescatter end
