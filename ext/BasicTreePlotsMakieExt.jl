@@ -191,6 +191,7 @@ end
 
 
 # treescatter =================================================================================
+# TODO: add argument that maps value to colormap or size
 Makie.@recipe(TreeScatter, tree) do scene
     attr = Makie.Attributes(
         alpha = @something(Makie.theme(scene, :alpha), 1.0),
@@ -245,10 +246,12 @@ Makie.@recipe(TreeCladeLabel, tree) do scene
         linestyle = @something(Makie.theme(scene, :linestyle), :solid),
         linewidth = @something(Makie.theme(scene, :linewidth), 1),
         labelalign = @something(Makie.theme(scene, :align), (:left, :center)),
+        labelrotation = @something(Makie.theme(scene, :rotation), 0.0),
         labeloffset = @something(Makie.theme(scene, :offset), (5.0f0, 0.0f0)),
         showroot = false,
         layoutstyle = :dendrogram,
         openangle = 0,
+        resolution = 25,
         alpha = @something(Makie.theme(scene, :alpha), 1.0),
         color = @something(Makie.theme(scene, :color), :black),
     )
@@ -271,35 +274,54 @@ function Makie.plot!(plt::TreeCladeLabel)
     plt.node[] = isnothing(plt.node[]) ? plt.tree[] : plt.node[]
     plt.label[] = isnothing(plt.label[]) ? repr(plt.node[]) : plt.label[]
 
+    ## Get coordinates
+    x = first(nodecoords[argmax(n -> first(nodecoords[n]), PreOrderDFS(plt.node[]))])
+    ymin = last(nodecoords[argmin(n -> last(nodecoords[n]), PreOrderDFS(plt.node[]))])
+    ymax = last(nodecoords[argmax(n -> last(nodecoords[n]), PreOrderDFS(plt.node[]))])
+
+    linecoordinates = [
+        (x + plt.lineoffset[], ymin - plt.linepadding[]),
+        [
+            (x + plt.lineoffset[], y) for y in range(
+                ymin - plt.linepadding[],
+                ymax + plt.linepadding[],
+                length = plt.resolution[],
+            )
+        ]...,
+        (x + plt.lineoffset[], ymax + plt.linepadding[]),
+        (NaN, NaN),
+    ]
+    labelposition = (x + plt.lineoffset[], ymin + ((ymax - ymin) / 2))
+
     ## Transform coordinate if plotting in Polar Axis
     if occursin("Polar", string(plt.transformation.transform_func[]))
         #TODO: Implement for PolarAxis
-        error("Not implemented yet...")
-    else
-        # Get bounding box coordinates
-        x = first(nodecoords[argmax(n -> first(nodecoords[n]), PreOrderDFS(plt.node[]))])
-        ymin = last(nodecoords[argmin(n -> last(nodecoords[n]), PreOrderDFS(plt.node[]))])
-        ymax = last(nodecoords[argmax(n -> last(nodecoords[n]), PreOrderDFS(plt.node[]))])
-
-        Makie.lines!(
-            plt,
-            [
-                (x + plt.lineoffset[], ymin - plt.linepadding[]),
-                (x + plt.lineoffset[], ymax + plt.linepadding[]),
-            ],
-            color = (plt.color[], plt.alpha[]),
-            linewidth = plt.linewidth,
-            linestyle = plt.linestyle,
-        )
-        Makie.text!(
-            (x + plt.lineoffset[], ymin + ((ymax - ymin) / 2));
-            text = plt.label,
-            offset = plt.labeloffset,
-            align = plt.labelalign,
-            color = (plt.color[], plt.alpha[]),
-            Makie.shared_attributes(plt, Makie.Text)...,
-        )
+        # error("Not implemented yet...")
+        linecoordinates = map(linecoordinates) do xy
+            (toangle(xy[2]), xy[1])
+        end
+        labelposition = (toangle(labelposition[2]), labelposition[1])
+        plt.labelrotation[] = labelposition[1]
     end
+
+    Makie.lines!(
+        plt,
+        linecoordinates,
+        color = (plt.color[], plt.alpha[]),
+        linewidth = plt.linewidth,
+        linestyle = plt.linestyle,
+    )
+
+    Makie.text!(
+        plt,
+        labelposition;
+        text = plt.label,
+        offset = plt.labeloffset,
+        align = plt.labelalign,
+        rotation = plt.labelrotation,
+        color = (plt.color[], plt.alpha[]),
+        Makie.shared_attributes(plt, Makie.Text)...,
+    )
 end
 
 # treearea ====================================================================================
