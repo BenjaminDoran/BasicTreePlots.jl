@@ -8,7 +8,16 @@ using AbstractTrees: nodevalue, children, PreOrderDFS
 const LAYOUTS = (:dendrogram, :cladogram, :radial)
 const BRANCHTYPES = (:square, :straight)
 
-export treeplot, treeplot!, treescatter, treescatter!
+export treeplot,
+    treeplot!,
+    treescatter,
+    treescatter!,
+    treelabels,
+    treelabels!,
+    treearea,
+    treearea!,
+    treecladelabel,
+    treecladelabel!
 
 """
     treeplot(tree; kwargs...)
@@ -104,6 +113,58 @@ function treeplot! end
 """
 function treescatter end
 function treescatter! end
+
+
+"""
+    treelabels(tree, kwargs...)
+
+# Arguments:
+
+- `tree`, the root node of a tree that has `AbstractTrees.children()` defined.
+    All nodes should be reachable by using `AbstractTrees.PreOrderDFS()` iterator.
+
+# Keyword arguments:
+
+- `showroot::Bool = false`, if `BasicTreePlots.distance()` is not `nan` for root, show line linking root to parent.
+
+- `layoutstyle::Symbol = :dendrogram` available options are `:dendrogram`, or `:cladogram`
+    -  `:dendrogram` displays tree taking into account the distance between parent and children nodes as calculated from `BasicTreePlots.distance(node)`.
+        If the distance is not defined, it defaults to `1` and is equivalent to the `:cladogram` layout
+    - `:cladogram` displays the tree where each distance from a child node to their parent is set to `1`.
+
+- `branchstyle::Symbol = :square` available options are `:square` or `:straight`
+    - `:square` will display line from child to parent as going back to the height of the parent,
+        before connecting back to the parent node at a right angle.
+    -  `straight` will display line from child to parent as a straight line from child to parent.
+
+- `tipannotations::{Union{Dict,Nothing}} = nothing`,
+
+- `usemaxdepth = false`, if `true` draw guide lines from each leaf tip to the depth of the leaf that is maximally distant from root.
+    Useful for connecting leaves to there location on the y axis (or θ axis if plotted on `PolarAxis`).
+
+- `tipfontsize = 9.0f0`, font size that tip labels are displayed at.
+
+- `openangle = 0`, Angle in radians that limits span of tree around the circle when plotted on `PolarAxis`.
+    if `openangle = deg2rad(5)` then leaf tips will spread across angles `0` to `(2π - openangle)`.
+
+- `tipalign = (:left, :center)` text alignment of tip labels.
+    see [Makie options](https://docs.makie.org/v0.21/reference/plots/text#alignment)
+
+- `tipannotationoffset = (3.0f0, 0.0f0)` offset of tip label from actual tip position.
+    The first value is associated with the `x` axis, and the second is associated with the `y` axis.
+    (Currently, only available for cartisian axis)
+
+"""
+function treelabels end
+function treelabels! end
+
+
+function treecladelabel end
+function treecladelabel! end
+
+
+function treearea end
+function treearea! end
 
 # public distance, label
 
