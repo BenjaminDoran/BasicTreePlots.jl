@@ -18,7 +18,7 @@ BasicTreePlotsNewickTreeExt = "NewickTree"
 
 [compat]
 AbstractTrees = "0.4"
-Makie = "0.21, 0.22"
+Makie = "0.21, 0.22, 0.23"
 NewickTree = "0.3"
 Reexport = "1"
 Statistics = "1"
