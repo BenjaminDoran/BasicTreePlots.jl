@@ -19,7 +19,7 @@ BasicTreePlotsNewickTreeExt = "NewickTree"
 [compat]
 AbstractTrees = "0.4"
 Makie = "0.21, 0.22"
-NewickTree = "0.3"
+NewickTree = "0.3, 0.4"
 Reexport = "1"
 Statistics = "1"
 julia = "1.9"
