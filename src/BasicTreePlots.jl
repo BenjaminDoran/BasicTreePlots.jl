@@ -192,10 +192,10 @@ label(n) = string(nodevalue(n))
 isleaf(n) = (isempty ∘ children)(n)
 leafcount(t) = mapreduce(isleaf, +, PreOrderDFS(t))
 
-function nodepositions(tree; showroot = false, layoutstyle = :dendrogram)
+function nodepositions(tree; showroot = false, layoutstyle = :dendrogram, nodeoffset = 0)
     nodedict = Dict{Any,Tuple{Float64,Float64}}()
     currdepth = showroot ? distance(tree) : 0.0
-    leafcount = [-1]
+    leafcount = [0 + nodeoffset]
     if layoutstyle == :dendrogram
         coord_positions_dendrogram!(nodedict, tree, currdepth, leafcount)
     elseif layoutstyle == :cladogram

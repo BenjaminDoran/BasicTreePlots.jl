@@ -1,6 +1,6 @@
 module BasicTreePlotsMakieExt
 
-import BasicTreePlots
+using BasicTreePlots: BasicTreePlots
 import BasicTreePlots:
     treeplot,
     treeplot!,
@@ -13,29 +13,26 @@ import BasicTreePlots:
     treecladelabel,
     treecladelabel!
 
-import Makie
-import Makie: Point2f
+using Makie
+using Makie: Point2f, @recipe
 
-import AbstractTrees
-import AbstractTrees: PreOrderDFS
+using AbstractTrees: AbstractTrees
+using AbstractTrees: PreOrderDFS
 
 # treeplot ====================================================================================
-Makie.@recipe(TreePlot, tree) do scene
-    attr = Makie.Attributes(
-        showroot = false,
-        layoutstyle = :dendrogram,
-        branchstyle = :square,
-        ignorebranchlengths = false,
-        openangle = 0,
-        linevisible = true,
-        linecolor = @something(Makie.theme(scene, :color), :black),
-        linewidth = @something(Makie.theme(scene, :linewidth), 1),
-        linecolormap = @something(Makie.theme(scene, :colormap), :viridis),
-        branch_point_resolution = 25,
-        usemaxdepth = false,
-    )
-    Makie.MakieCore.generic_plot_attributes!(attr)
-    return Makie.MakieCore.colormap_attributes!(attr, Makie.theme(scene, :colormap))
+@recipe TreePlot (tree,) begin
+    showroot = false
+    layoutstyle = :dendrogram
+    branchstyle = :square
+    ignorebranchlengths = false
+    openangle = 0
+    linevisible = true
+    branch_point_resolution = 25
+    usemaxdepth = false
+    linecolor = @inherit color :black
+    linewidth = @inherit linewidth 1.0
+    linecolormap = @inherit colormap :viridis
+    Makie.mixin_generic_plot_attributes()...
 end
 
 function Makie.plot!(plt::TreePlot)
@@ -91,20 +88,18 @@ function Makie.plot!(plt::TreePlot)
 end
 
 # treelabels ==================================================================================
-Makie.@recipe(TreeLabels, tree) do scene
-    attr = Makie.Attributes(
-        showroot = false,
-        layoutstyle = :dendrogram,
-        branchstyle = :square,
-        openangle = 0,
-        usemaxdepth = false,
-        tipannotations = nothing,
-        tipfontsize = 9.0f0,
-        tipalign = @something(Makie.theme(scene, :align), (:left, :center)),
-        tipannotationoffset = @something(Makie.theme(scene, :offset), (3.0f0, 0.0f0)),
-    )
-    Makie.MakieCore.generic_plot_attributes!(attr)
-    return Makie.MakieCore.colormap_attributes!(attr, Makie.theme(scene, :colormap))
+@recipe TreeLabels (tree, tipannotations) begin
+    showroot = false
+    layoutstyle = :dendrogram
+    branchstyle = :square
+    openangle = 0
+    branch_point_resolution = 25
+    usemaxdepth = false
+    tiplabelfontsize = 9.0f0
+    tiplabelalign = @inherit align (:left, :center)
+    tiplabeloffset = @inherit offset (1.0f0, 0.0f0)
+    # clip_planes = @inherit clip_planes Plane3f[]
+    Makie.mixin_generic_plot_attributes()...
 end
 
 function Makie.plot!(plt::TreeLabels)
@@ -132,8 +127,6 @@ function Makie.plot!(plt::TreeLabels)
     end
 
     ## Lines from each tip to max tip depth
-    # FIXME: If set to true, it works. Otherwise it raises a StackOverflow error
-    # It seems to have problems resizing the canvas whenever we add the tip labels.
     if plt.usemaxdepth[]
         tippositions_end = Point2f[]
         for pos in tippositions_start
@@ -173,38 +166,37 @@ function Makie.plot!(plt::TreeLabels)
             toangle(pos[2])
         end
         tippositions = map(tippositions) do pos
-            Point2f(toangle(pos[2]), pos[1])
+            xoff, yoff = plt.tiplabeloffset[] ./ 10
+            Point2f(toangle(pos[2] + yoff), pos[1] + xoff)
         end
-        plt.tipannotationoffset[] = (0.0f0, 0.0f0)
     end
 
     Makie.text!(
+        plt,
         tippositions;
         text = tiplabels,
-        fontsize = plt.tipfontsize,
-        align = plt.tipalign,
-        offset = plt.tipannotationoffset,
+        fontsize = plt.tiplabelfontsize,
+        align = plt.tiplabelalign,
+        offset = plt.tiplabeloffset,
         rotation = tiprotations,
         Makie.shared_attributes(plt, Makie.Text)...,
     )
 end
 
 
-# treescatter =================================================================================
+# # treescatter =================================================================================
 # TODO: add argument that maps value to colormap or size
-Makie.@recipe(TreeScatter, tree) do scene
-    attr = Makie.Attributes(
-        alpha = @something(Makie.theme(scene, :alpha), 1.0),
-        showroot = false,
-        layoutstyle = :dendrogram,
-        marker = @something(Makie.theme(scene, :marker), :circle),
-        markercolor = @something(Makie.theme(scene, :color), :black),
-        markersize = @something(Makie.theme(scene, :markersize), 5),
-        nodeordering = AbstractTrees.PreOrderDFS,
-        openangle = 0,
-    )
-    Makie.MakieCore.generic_plot_attributes!(attr)
-    return Makie.MakieCore.colormap_attributes!(attr, Makie.theme(scene, :colormap))
+@recipe TreeScatter (tree,) begin
+    showroot = false
+    layoutstyle = :dendrogram
+    openangle = 0
+    nodeordering = AbstractTrees.PreOrderDFS
+    alpha = @inherit alpha 1.0
+    marker = @inherit marker :circle
+    markercolor = @inherit color :black
+    markersize = @inherit markersize 5
+    colormap = @inherit colormap :viridis
+    Makie.mixin_generic_plot_attributes()...
 end
 
 function Makie.plot!(plt::TreeScatter)
@@ -236,27 +228,27 @@ function Makie.plot!(plt::TreeScatter)
 end
 
 
-# treecladelabel ==============================================================================
-Makie.@recipe(TreeCladeLabel, tree) do scene
-    attr = Makie.Attributes(
-        node = nothing,
-        label = nothing,
-        linepadding = 0.1,
-        lineoffset = 0.5,
-        linestyle = @something(Makie.theme(scene, :linestyle), :solid),
-        linewidth = @something(Makie.theme(scene, :linewidth), 1),
-        labelalign = @something(Makie.theme(scene, :align), (:left, :center)),
-        labelrotation = @something(Makie.theme(scene, :rotation), 0.0),
-        labeloffset = @something(Makie.theme(scene, :offset), (5.0f0, 0.0f0)),
-        showroot = false,
-        layoutstyle = :dendrogram,
-        openangle = 0,
-        resolution = 25,
-        alpha = @something(Makie.theme(scene, :alpha), 1.0),
-        color = @something(Makie.theme(scene, :color), :black),
-    )
-    Makie.MakieCore.generic_plot_attributes!(attr)
-    return Makie.MakieCore.colormap_attributes!(attr, Makie.theme(scene, :colormap))
+# # treecladelabel ==============================================================================
+@recipe TreeCladeLabel (tree,) begin
+    node = nothing
+    label = nothing
+    linepadding = 0.1
+    lineoffset = 0.5
+    linestyle = @inherit linestyle :solid
+    linewidth = @inherit linewidth 1
+    labelalign = @inherit align (:left, :center)
+    # labelrotation = @inherit rotation 0.0
+    labeloffset = @inherit offset (5.0f0, 0.0f0)
+    showroot = false
+    layoutstyle = :dendrogram
+    openangle = 0
+    resolution = 25
+    alpha = @inherit alpha 1.0
+    color = @inherit color :black
+    font = @inherit font :regular
+    rotation = @inherit rotation 0.0
+    align = @inherit align (:left, :center)
+    Makie.mixin_generic_plot_attributes()...
 end
 
 function Makie.plot!(plt::TreeCladeLabel)
@@ -295,13 +287,11 @@ function Makie.plot!(plt::TreeCladeLabel)
 
     ## Transform coordinate if plotting in Polar Axis
     if occursin("Polar", string(plt.transformation.transform_func[]))
-        #TODO: Implement for PolarAxis
-        # error("Not implemented yet...")
         linecoordinates = map(linecoordinates) do xy
             (toangle(xy[2]), xy[1])
         end
         labelposition = (toangle(labelposition[2]), labelposition[1])
-        plt.labelrotation[] = labelposition[1]
+        plt.rotation[] = labelposition[1] + plt.rotation[]
     end
 
     Makie.lines!(
@@ -318,32 +308,29 @@ function Makie.plot!(plt::TreeCladeLabel)
         text = plt.label,
         offset = plt.labeloffset,
         align = plt.labelalign,
-        rotation = plt.labelrotation,
         color = (plt.color[], plt.alpha[]),
         Makie.shared_attributes(plt, Makie.Text)...,
     )
 end
 
-# treearea ====================================================================================
-Makie.@recipe(TreeArea, tree) do scene
-    attr = Makie.Attributes(
-        node = nothing,
-        # Tree
-        showroot = false,
-        layoutstyle = :dendrogram,
-        openangle = 0,
-        # Fill
-        alpha = @something(Makie.theme(scene, :alpha), 1.0),
-        color = @something(Makie.theme(scene, :color), :transparent),
-        padding = (0.2f0, 0.2f0),
-        # Stroke
-        addstroke = false,
-        strokestyle = @something(Makie.theme(scene, :linestyle), :solid),
-        strokecolor = @something(Makie.theme(scene, :color), (:black, 1.0)),
-        strokewidth = @something(Makie.theme(scene, :linewidth), 1.0),
-    )
-    Makie.MakieCore.generic_plot_attributes!(attr)
-    return Makie.MakieCore.colormap_attributes!(attr, Makie.theme(scene, :colormap))
+# # treearea ====================================================================================
+@recipe TreeArea (tree,) begin
+    node = nothing
+    # Tree
+    showroot = false
+    layoutstyle = :dendrogram
+    openangle = 0
+    # Fill
+    alpha = @inherit alpha 1.0
+    color = @inherit color :transparent
+    padding = ((0.1f0, 0.1f0), (0.1f0, 0.1f0))
+    resolution = 25
+    # Stroke
+    addstroke = false
+    strokestyle = @inherit linestyle :solid
+    strokecolor = @inherit color (:black, 1.0)
+    strokewidth = @inherit linewidth 1.0
+    Makie.mixin_generic_plot_attributes()...
 end
 
 function Makie.plot!(plt::TreeArea)
@@ -366,78 +353,80 @@ function Makie.plot!(plt::TreeArea)
         plt.color[], plt.alpha[] = (plt.color[][1], plt.color[][2] * plt.alpha[])
     end
 
+    # Get bounding box coordinates
+    # FIX: instead of getting list of nodes to traverse, directly extract coordinates to
+    # simplify the calculation of extrema values
+    allnodes = PreOrderDFS(plt.node[])
+    xmin =
+        first(nodecoords[argmin(n -> first(nodecoords[n]), allnodes)]) - plt.padding[][1][1]
+    xmax =
+        first(nodecoords[argmax(n -> first(nodecoords[n]), allnodes)]) + plt.padding[][1][2]
+    ymin =
+        last(nodecoords[argmin(n -> last(nodecoords[n]), allnodes)]) - plt.padding[][2][1]
+    ymax =
+        last(nodecoords[argmax(n -> last(nodecoords[n]), allnodes)]) + plt.padding[][2][2]
+
+    clade_region = Point2f[
+        (xmin, ymin),
+        ((xmin, i) for i in range(ymin, ymax, length = plt.resolution[]))...,
+        (xmin, ymax),
+        (xmax, ymax),
+        ((xmax, i) for i in range(ymax, ymin, length = plt.resolution[]))...,
+        (xmax, ymin),
+    ]
+
     ## Transform coordinate if plotting in Polar Axis
     if occursin("Polar", string(plt.transformation.transform_func[]))
-        # TODO: Implement for PolarAxis
-        error("Not implemented yet...")
-    else
-        # Get bounding box coordinates
-        # FIX: instead of getting list of nodes to traverse, directly extract coordinates to
-        # simplify the calculation of extrema values
-        allnodes = PreOrderDFS(plt.node[])
-        xmin =
-            first(nodecoords[argmin(n -> first(nodecoords[n]), allnodes)]) -
-            plt.padding[][1]
-        xmax =
-            first(nodecoords[argmax(n -> first(nodecoords[n]), allnodes)]) +
-            plt.padding[][1]
-        ymin =
-            last(nodecoords[argmin(n -> last(nodecoords[n]), allnodes)]) - plt.padding[][2]
-        ymax =
-            last(nodecoords[argmax(n -> last(nodecoords[n]), allnodes)]) + plt.padding[][2]
+        clade_region = Point2f[(toangle(y), x) for (x, y) in clade_region]
+    end
 
-        # FIX: Do this in a more intelligent way
-        if plt.addstroke[]
-            Makie.poly!(
-                plt,
-                Point2f[(xmin, ymin), (xmin, ymax), (xmax, ymax), (xmax, ymin)],
-                color = (plt.color[], plt.alpha[]),
-                linestyle = plt.strokestyle[],
-                strokecolor = plt.strokecolor[],
-                strokewidth = plt.strokewidth[],
-            )
-        else
-            Makie.poly!(
-                plt,
-                Point2f[(xmin, ymin), (xmin, ymax), (xmax, ymax), (xmax, ymin)],
-                color = (plt.color[], plt.alpha[]),
-            )
-        end
+    # FIX: Do this in a more intelligent way
+    if plt.addstroke[]
+        Makie.poly!(
+            plt,
+            clade_region,
+            color = (plt.color[], plt.alpha[]),
+            linestyle = plt.strokestyle[],
+            strokecolor = plt.strokecolor[],
+            strokewidth = plt.strokewidth[],
+        )
+    else
+        Makie.poly!(plt, clade_region, color = (plt.color[], plt.alpha[]))
     end
 end
 
 
 
-# themes ======================================================================================
-# TODO: Will this be exposed eventually?
-theme_empty() = Makie.Theme(
-    Axis = (;
-        topspinevisible = false,
-        rightspinevisible = false,
-        leftspinevisible = false,
-        bottomspinevisible = false,
-        xticklabelsvisible = false,
-        xgridvisible = false,
-        xminorgridvisible = false,
-        xticksvisible = false,
-        xminorticksvisible = false,
-        xlabelvisible = false,
-        yticklabelsvisible = false,
-        ygridvisible = false,
-        yminorgridvisible = false,
-        yticksvisible = false,
-        yminorticksvisible = false,
-        ylabelvisible = false,
-    ),
-    PolarAxis = (;
-        spinevisible = false,
-        rticklabelsvisible = false,
-        rgridvisible = false,
-        rminorgridvisible = false,
-        thetaticklabelsvisible = false,
-        thetagridvisible = false,
-        thetaminorgridvisible = false,
-    ),
-)
+# # themes ======================================================================================
+# # TODO: Will this be exposed eventually?
+# theme_empty() = Makie.Theme(
+#     Axis = (;
+#         topspinevisible = false,
+#         rightspinevisible = false,
+#         leftspinevisible = false,
+#         bottomspinevisible = false,
+#         xticklabelsvisible = false,
+#         xgridvisible = false,
+#         xminorgridvisible = false,
+#         xticksvisible = false,
+#         xminorticksvisible = false,
+#         xlabelvisible = false,
+#         yticklabelsvisible = false,
+#         ygridvisible = false,
+#         yminorgridvisible = false,
+#         yticksvisible = false,
+#         yminorticksvisible = false,
+#         ylabelvisible = false,
+#     ),
+#     PolarAxis = (;
+#         spinevisible = false,
+#         rticklabelsvisible = false,
+#         rgridvisible = false,
+#         rminorgridvisible = false,
+#         thetaticklabelsvisible = false,
+#         thetagridvisible = false,
+#         thetaminorgridvisible = false,
+#     ),
+# )
 
 end

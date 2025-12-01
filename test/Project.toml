@@ -1,7 +1,11 @@
 [deps]
 AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
-MakieCore = "20f20a25-4f0e-4fdf-b5d1-57303727442b"
+BasicTreePlots = "523fa316-3eda-45c7-ad2f-0d13a1dc3d77"
+CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 NewickTree = "b0a14db8-6308-4ebc-8917-f72cd81f5094"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-BasicTreePlots = "523fa316-3eda-45c7-ad2f-0d13a1dc3d77"
+
+[sources]
+BasicTreePlots = {path = ".."}
