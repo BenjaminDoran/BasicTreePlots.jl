@@ -8,5 +8,6 @@ Manifest.toml
 benchmark/*.json
 coverage
 docs/build/
+test/*.ipynb
 env
 node_modules
