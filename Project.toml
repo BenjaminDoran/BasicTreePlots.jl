@@ -8,14 +8,11 @@ projects = ["test", "docs"]
 
 [deps]
 AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
+OrderedCollections = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [weakdeps]
-# CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
-# GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
-# WGLMakie = "276b4fcb-3e11-5398-bf8b-a0c2d153d008"
-# RPRMakie = "22d9f318-5e34-4b44-b769-6e3734a732a6"
 Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 NewickTree = "b0a14db8-6308-4ebc-8917-f72cd81f5094"
 
@@ -27,6 +24,8 @@ BasicTreePlotsNewickTreeExt = "NewickTree"
 AbstractTrees = "0.4"
 Makie = "0.24"
 NewickTree = "0.4"
+OrderedCollections = "1.8.1"
 Reexport = "1"
 Statistics = "1"
 julia = "1.9"
+
