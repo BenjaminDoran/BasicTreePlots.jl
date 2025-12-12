@@ -31,6 +31,8 @@ toangle(y, N, openangle) = (y / N) * (2π - (openangle % 2pi))
 
 # Examples
 
+Quick snippet for seeing basic features
+
 ```
 using NewickTree, CairoMakie
 tree = nw"((a:0.1, b:0.2):0.3, (c:0.5, (d:0.3, e:0.1):0.1):0.2);"
@@ -39,14 +41,17 @@ layoutstyles = (:dendrogram, :cladogram)
 branchstyles = (:square, :straight)
 for i in 1:2, j in 1:2
 ax, tp = treeplot(fig[i,j], tree;
-	layoutstyle=layoutstyles[i],
-	branchstyle=branchstyles[j],
-	axis=(; title=join([layoutstyles[i]), ", ", branchstyles[j]])
+    layoutstyle=layoutstyles[i],
+    branchstyle=branchstyles[j],
+    axis=(; title=join([layoutstyles[i]), ", ", branchstyles[j]])
 )
-treelabel!(tp.nodepoints)
+treelabels!(tp.nodepoints)
+scatter!(tp.orderedpoints)
 end
 fig
 ```
+
+This can then be annotated with `treearea`, `treelabels`, and `treecladelabel` plots
 """
 @recipe TreePlot (tree,) begin
 

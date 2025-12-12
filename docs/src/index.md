@@ -13,7 +13,7 @@ i.e. has `AbstractTrees.children(YourType)` defined.
 Optionally, `BasicTreePlots.distance(YourType)` and `BasicTreePlots.label(YourType)` can be defined to allow plotting trees
 with variable distances between children and parent nodes and pretty printing of each node in the tree respectively.
 
-Currently, we only provide `Makie.jl` backends, but are interested in contributions for recipes for `Plots.jl` and `TidyPlots.jl`.
+Currently, we only provide `Makie.jl` backends, but are interested in contributions for recipes for `Plots.jl` and `TidierPlots.jl`.
 As well as any other backends or custom tree structures that don't work automatically.
 See the `ext` folder for example extensions.
 
@@ -43,11 +43,7 @@ see [Tutorials](tutorials/basics.md) and [Gallery](gallery/simple_phylogeny.md) 
 
 ## `treeplot()` documentation
 
-see [reference](95-reference.md) for other function's documentation
-
-```@docs; canonical=false
-treeplot
-```
+see [reference](reference/overview.md) for other function's documentation
 
 ## Contributors
 

@@ -23,8 +23,10 @@ LiveServer.servedocs(;
     foldername = joinpath(repo_root, "docs"),
     # Extra source folder to watch for changes
     include_dirs = String[
-    # Watch the src folder so docstrings can be Revise'd
-        joinpath(repo_root, "src"),],
+        # Watch the src folder so docstrings can be Revise'd
+        joinpath(repo_root, "docs/src"),
+        joinpath(repo_root, "docs/reference"),
+    ],
     skip_dirs = String[
         # Skip the folder where Literate.jl output is written. This is needed
         # to avoid infinite loops where running make.jl updates watched files,
