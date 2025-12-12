@@ -12,6 +12,39 @@ const BRANCHTYPES = (:square, :straight)
 export treeplot,
     treeplot!, treelabels, treelabels!, treecladelabel, treecladelabel!, treearea, treearea!
 
+
+"""
+	treeplot(tree; kwargs...)
+
+# Args:
+
+- tree, the root node of a tree that has `AbstractTrees.children()` defined.
+	All nodes should be reachable by using `AbstractTrees.PreOrderDFS()` iterator.
+
+# Examples
+
+Quick snippet for seeing basic features
+
+```
+using NewickTree, CairoMakie
+tree = nw"((a:0.1, b:0.2):0.3, (c:0.5, (d:0.3, e:0.1):0.1):0.2);"
+fig = Figure(size=(500, 500))
+layoutstyles = (:dendrogram, :cladogram)
+branchstyles = (:square, :straight)
+for i in 1:2, j in 1:2
+ax, tp = treeplot(fig[i,j], tree;
+    layoutstyle=layoutstyles[i],
+    branchstyle=branchstyles[j],
+    axis=(; title=join([layoutstyles[i]), ", ", branchstyles[j]])
+)
+treelabels!(tp.nodepoints)
+scatter!(tp.orderedpoints)
+end
+fig
+```
+
+This can then be annotated with `treearea`, `treelabels`, and `treecladelabel` plots
+"""
 function treeplot end
 function treeplot! end
 
@@ -53,6 +86,68 @@ label(n) = string(nodevalue(n))
 isleaf(n) = (isempty ∘ children)(n)
 
 leafcount(t) = mapreduce(isleaf, +, PreOrderDFS(t))
+
+
+"""
+	ladderize!([fun::Function, agg::Function,] tree; rev=false)
+	ladderize([fun::Function, agg::Function,] tree; rev=false)
+
+Perform inplace sorting 'ladderization' of the children of each node in the provided tree
+based on user provided scaler functions `fun` and aggregating function `agg`. `ladderize`
+(without the exlamation point) performs a `deepcopy` of the tree before sorting the tree
+
+Calling `ladderize` with no funtion arguments is equivalent to calling `ladderize!(n->1, sum, t; rev)` which
+will sort the tree by the node's count of descendents.
+
+# Args:
+* `fun::Function`: function that takes leaves of the tree and outputs scaler value
+* `agg::Function`: aggregating function, takes collection of outputs from `fun` and returns scaler output
+* `tree`: tree object that fulfills `AbstractTrees` interface. `AbstractTrees.children(node)`
+	should provide sortable collection children of the node.
+* `rev::Bool=false`: whether to sort children of each node in acending (default) or desending order.
+
+# Examples
+
+```
+ladderize!(tree)
+```
+
+```
+tree = ladderize(tree)
+```
+
+```
+ladderize!(mean, tree) do leaf
+	leafdata_dict[name(leaf)]["fitness"]
+end
+```
+"""
+function ladderize(t; rev = false)
+    new_t = deepcopy(t)
+    ladderize!(new_t; rev)
+end
+function ladderize(fun, agg, t; rev = false)
+    new_t = deepcopy(t)
+    ladderize!(fun, agg, new_t; rev)
+end
+function ladderize!(t; rev = false)
+    ladderize!(n->1, sum, t; rev)
+end
+function ladderize!(fun::Function, agg::Function, t; rev = false)
+    function walk!(n)
+        if isleaf(n)
+            return fun(n)
+        else
+            node_children = children(n)
+            child_results = [walk!(c) for c in node_children]
+            node_children .= node_children[sortperm(child_results; rev)]
+            return agg(child_results)
+        end
+    end
+    walk!(t)
+    return t
+end
+
 
 
 function nodepositions(tree; kwargs...)
@@ -196,33 +291,5 @@ function tipannotations(nodedict)
     res = [(v, label(k)) for (k, v) in nodedict if isleaf(k)]
     first.(res), last.(res)
 end
-
-
-function ladderize(t; rev)
-    new_t = deepcopy(t)
-    ladderize!(new_t; rev)
-end
-function ladderize(fun, agg, t; rev)
-    new_t = deepcopy(t)
-    ladderize!(fun, agg, new_t; rev)
-end
-function ladderize!(t; rev = false)
-    ladderize!(length, sum, t; rev)
-end
-function ladderize!(fun::Function, agg::Function, t; rev = false)
-    function walk!(n)
-        if isleaf(n)
-            return fun(n)
-        else
-            node_children = children(n)
-            child_results = [walk!(c) for c in node_children]
-            node_children .= node_children[sortperm(child_results; rev)]
-            return agg(child_results)
-        end
-    end
-    walk!(t)
-    return t
-end
-
 
 end # module

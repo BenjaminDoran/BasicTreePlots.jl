@@ -39,9 +39,9 @@ layoutstyles = (:dendrogram, :cladogram)
 branchstyles = (:square, :straight)
 for i in 1:2, j in 1:2
 ax, tp = treeplot(fig[i,j], tree;
-    layoutstyle=layoutstyles[i],
-    branchstyle=branchstyles[j],
-    axis=(; title=join([layoutstyles[i]), ", ", branchstyles[j]])
+	layoutstyle=layoutstyles[i],
+	branchstyle=branchstyles[j],
+	axis=(; title=join([layoutstyles[i]), ", ", branchstyles[j]])
 )
 treelabel!(tp.nodepoints)
 end
@@ -85,6 +85,20 @@ fig
 
 
     """
+    Options are `:right`, `:top`, `:left', and `:bottom`, and indicate where the leaves point away from the root.
+    `:right` and `:top` will keep the root at zero the leaves will increase in distance on the `x` and `y` axis respectively.
+    `:left` and `bottom` will translate the tree after multiplying the axis by `-1` so that the deepest leaf
+    is at `0` and the internal nodes increase in height away from that leaf.
+
+    To keep the root at zero but the leaves pointing down, use `orientation=:top` in combination with
+    `Axis(figloc; yreversed=true)`.
+
+    """
+    orientation = :right
+
+    maxdepthoffset = 0.0f0
+
+    """
     Number of points associated to each line segment. Can be decreased to increase plotting speed.
     Or, increased if lines that should be smooth are not.
     """
@@ -124,6 +138,8 @@ function Makie.plot!(plt::TreePlot)
         :branchstyle,
         :branchpointresolution,
         :openangle,
+        :orientation,
+        :maxdepthoffset,
         :transform_func,
     ]
 
@@ -131,7 +147,16 @@ function Makie.plot!(plt::TreePlot)
         plt.attributes,
         inputs,
         [:nodepoints, :orderedpoints, :branchsegments, :maxtreedepth, :nleaves], # outputs
-    ) do tree, showroot, layoutstyle, leafoffset, branchstyle, resolution, openangle, tf
+    ) do tree,
+    showroot,
+    layoutstyle,
+    leafoffset,
+    branchstyle,
+    resolution,
+    openangle,
+    orientation,
+    maxdoff,
+    tf
 
         nleaves = BasicTreePlots.leafcount(tree)
 
@@ -143,10 +168,42 @@ function Makie.plot!(plt::TreePlot)
             nodeoffset = leafoffset,
         )
 
+        maxtreedepth = maximum(x -> x[1], values(nodepoints))
+
         branchsegments =
             BasicTreePlots.makesegments(nodepoints, tree; branchstyle, resolution)
 
-        maxtreedepth = maximum(x -> x[1], values(nodepoints))
+        if orientation !== :right && tf isa Polar
+            @warn("Orientation of $orientation is not well tested on PolarAxis")
+        end
+
+        if orientation === :right
+        elseif orientation === :left
+            map!(values(nodepoints)) do (x, y)
+                (-x + maxtreedepth + maxdoff, y)
+            end
+            map!(branchsegments) do segment
+                [(-x + maxtreedepth + maxdoff, y) for (x, y) in segment]
+            end
+        elseif orientation === :top
+            map!(values(nodepoints)) do (x, y)
+                (y, x)
+            end
+            map!(branchsegments) do segment
+                [(y, x) for (x, y) in segment]
+            end
+        elseif orientation === :bottom
+            map!(values(nodepoints)) do (x, y)
+                (y, -x + maxtreedepth + maxdoff)
+            end
+            map!(branchsegments) do segment
+                [(y, -x + maxtreedepth + maxdoff) for (x, y) in segment]
+            end
+        else
+            @warn(
+                "Orientation of $orientation is not in options of :right, :top, :left, or :bottom"
+            )
+        end
 
         # modify all points if axis is polar
         if tf isa Polar
@@ -567,10 +624,10 @@ fig
 
     # Stroke
     "Color of stroke around shaded region. If `:transparent` (default) stroke wont be seen."
-    strokecolor = @inherit color (:transparent, 1.0)
+    strokecolor = (:black, 1.0)
     "Width of stroke line around shaded region"
-    strokewidth = @inherit strokewidth 1.0
-    "Style of stroke around region"
+    strokewidth = @inherit strokewidth 0.0
+    # "Style of stroke around region"
     strokestyle = @inherit linestyle :solid
     """
        Sets which attributes to cycle when creating multiple plots. The values to
@@ -595,7 +652,7 @@ function Makie.plot!(plt::TreeArea)
     ) do nodepoints, nodes, resolution, padding, tf
 
         # if no nodes provided use root
-        nodes = isnothing(nodes) ? first(last(nodepoints)) : nodes
+        nodes = isnothing(nodes) ? [first(last(nodepoints))] : nodes
 
         # expand padding to root, leaves, leftwidth, rightwidth directions
         padding = Makie.to_lrbt_padding(padding)
@@ -628,8 +685,10 @@ function Makie.plot!(plt::TreeArea)
                 tf isa Polar ? Polygon(reverse.(clade_region)) : Polygon(clade_region)
             return clade_region
         end
+        clade_regions = length(clade_regions) == 1 ? only(clade_regions) : clade_regions
         return (clade_regions,)
     end
+
 
     p = Makie.poly!(
         plt,
