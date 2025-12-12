@@ -45,13 +45,24 @@ hidespines!(ax)
 treeplot!(tree)
 fig
 
+# We can add tip labels
+
+fig = Figure()
+ax = PolarAxis(fig[1, 1])
+hidedecorations!(ax)
+hidespines!(ax)
+tp = treeplot!(tree)
+treelabels!(tp.nodepoints)
+fig
+
 # We can increase the tip label fontsize.
 
 fig = Figure()
 ax = PolarAxis(fig[1, 1], rautolimitmargin = (0.0, 0.2))
 hidedecorations!(ax)
 hidespines!(ax)
-treeplot!(tree; tipfontsize = 30)
+tp = treeplot!(tree)
+treelabels!(tp.nodepoints, fontsize = 40)
 fig
 
 # We can change the line color
@@ -60,7 +71,8 @@ fig = Figure()
 ax = PolarAxis(fig[1, 1], rautolimitmargin = (0.0, 0.1))
 hidedecorations!(ax)
 hidespines!(ax)
-treeplot!(tree; linecolor = :orange, tipfontsize = 12)
+tp = treeplot!(tree; branchcolor = :orange)
+treelabels!(tp.nodepoints, fontsize = 20)
 fig
 
 # We can change the line color based on info in the tree
@@ -73,7 +85,8 @@ fig = Figure()
 ax = PolarAxis(fig[1, 1], rautolimitmargin = (0.0, 0.1))
 hidedecorations!(ax)
 hidespines!(ax)
-treeplot!(tree; linecolor = branchcolors, tipfontsize = 12)
+tp = treeplot!(tree; branchcolor = branchcolors)
+treelabels!(tp.nodepoints, fontsize = 20)
 fig
 
 # or employ markers in the nodes to showcase the tree's information
@@ -82,8 +95,9 @@ fig = Figure()
 ax = PolarAxis(fig[1, 1], rautolimitmargin = (0.0, 0.1))
 hidedecorations!(ax)
 hidespines!(ax)
-treeplot!(tree; tipfontsize = 12)
-treescatter!(tree; markercolor = branchcolors)
+tp=treeplot!(tree;)
+treelabels!(tp.nodepoints, fontsize = 20, labeloffset = (0.0, 0.2))
+scatter!(tp.orderedpoints; color = branchcolors, markersize = 20)
 fig
 
 # For instance if we have external data about each node in the tree
@@ -106,23 +120,9 @@ fig = Figure()
 ax = PolarAxis(fig[1, 1], rautolimitmargin = (0.0, 0.1))
 hidedecorations!(ax)
 hidespines!(ax)
-p = treeplot!(tree; linecolor = branchcolors, linewidth = branchwidths, tipfontsize = 12)
-Colorbar(fig[1, 2][3, 1], p)
-fig
 
-# if we have too many leaf tips to read their labels anyway we can turn off the label visibility
-
-fig = Figure()
-ax = PolarAxis(fig[1, 1], rautolimitmargin = (0.0, 0.1))
-hidedecorations!(ax)
-hidespines!(ax)
-p = treeplot!(
-    tree;
-    linecolor = branchcolors,
-    linewidth = branchwidths,
-    tipfontsize = 12,
-    tipannotationsvisible = false,
-)
+p = treeplot!(tree; branchcolor = branchcolors, branchwidth = branchwidths)
+treelabels!(tp.nodepoints; fontsize = 20)
 Colorbar(fig[1, 2][3, 1], p)
 fig
 
@@ -134,9 +134,8 @@ hidedecorations!(ax)
 hidespines!(ax)
 p = treeplot!(
     tree;
-    linecolor = branchcolors,
-    linewidth = branchwidths,
-    tipfontsize = 12,
+    branchcolor = branchcolors,
+    branchwidth = branchwidths,
     openangle = deg2rad(140),
 )
 Colorbar(fig[1, 2][3, 1], p)

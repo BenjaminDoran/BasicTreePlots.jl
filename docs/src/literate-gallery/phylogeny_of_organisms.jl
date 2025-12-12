@@ -4,6 +4,9 @@ using CairoMakie, NewickTree, AbstractTrees, BasicTreePlots
 tree =
     nw"(Bovine:0.69395,(Gibbon:0.36079,(Orangutan:0.33636,(Gorilla:0.17147,(Chimp:0.19268,Human:0.11927):0.08386):0.06124):0.15057):0.54939,Mouse:1.21460);"
 
+tree = BasicTreePlots.ladderize(tree)
+
+
 isprimate = Dict(
     "Bovine" => false,
     "Gibbon" => true,
@@ -49,6 +52,7 @@ fig = Figure()
 ax = Axis(fig[1, 1], xautolimitmargin = (0.0, 0.2))
 hidedecorations!(ax)
 hidespines!(ax)
-treeplot!(ax, tree, usemaxdepth = true)
-treescatter!(ax, tree, markercolor = markercolors, markersize = markersizes)
+tp = treeplot!(ax, tree, usemaxdepth = true)
+treelabels!(tp.nodepoints; depth = tp.maxtreedepth)
+scatter!(ax, tp.orderedpoints, color = markercolors, markersize = markersizes)
 fig
