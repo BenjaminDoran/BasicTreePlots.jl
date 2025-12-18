@@ -143,6 +143,7 @@ function Makie.plot!(plt::TreePlot)
         :branchstyle,
         :branchpointresolution,
         :openangle,
+        :usemaxdepth,
         :orientation,
         :maxdepthoffset,
         :transform_func,
@@ -159,6 +160,7 @@ function Makie.plot!(plt::TreePlot)
     branchstyle,
     resolution,
     openangle,
+    usemaxdepth,
     orientation,
     maxdoff,
     tf
@@ -173,7 +175,18 @@ function Makie.plot!(plt::TreePlot)
             nodeoffset = leafoffset,
         )
 
+
+
         maxtreedepth = maximum(x -> x[1], values(nodepoints))
+
+        if usemaxdepth
+            foreach(PreOrderDFS(tree)) do node
+                if BasicTreePlots.isleaf(node)
+                    (x, y) = nodepoints[node]
+                    nodepoints[node] = (maxtreedepth, y)
+                end
+            end
+        end
 
         branchsegments =
             BasicTreePlots.makesegments(nodepoints, tree; branchstyle, resolution)
