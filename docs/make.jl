@@ -44,7 +44,7 @@ function parse_args(ARGS)
 end
 
 include("helpers/helpers.jl")
-# include("helpers/figure_block.jl")
+include("helpers/figure_block.jl")
 include("helpers/attrdocs_block.jl")
 include("helpers/shortdocs_block.jl")
 
@@ -123,6 +123,7 @@ function main(ARGS)
         "Change Log" => "changelog.md",
     ]
 
+    empty!(MakieDocsHelpers.FIGURES)
     Documenter.makedocs(;
         # modules = [BasicTreePlots],
         authors = "Benjamin Doran and collaborators",

@@ -11,6 +11,7 @@ module MakieDocsHelpers
 import ImageTransformations
 import Makie
 import FileIO
+using BasicTreePlots
 
 struct Png
     bytes::Vector{UInt8}
@@ -203,10 +204,10 @@ function Documenter.Selectors.runner(::Type{FigureBlocks}, node, page, doc)
     mime = get(kwargs, :mime, :png)
     image_name = "$id.$mime"
 
-    MarkdownAST.insert_before!(
-        node,
-        @ast Documenter.RawNode(:html, "<a id=\"example-$id\" />")
-    )
+    # MarkdownAST.insert_before!(
+    #     node,
+    #     @ast Documenter.RawNode(:html, "<a id=\"example-$id\" />")
+    # )
     # we save and insert the image manually, just because we want to be able to set width and height.
     # this makes images look sharp as intended, and it improves the accuracy with which one gets to
     # image examples from the overview pages, as with annotated width and height the right locations can
@@ -235,7 +236,7 @@ function transform_figure_code(
         mime == :png ? "image/png" : error("Unknown mimetype $mime")
 
     return (is_continued ? "" : """
-                using $backend
+                using $backend, BasicTreePlots # hide
                 $backend.activate!(; px_per_unit = 2) # hide
                 """) * """
                        import ..MakieDocsHelpers # hide
