@@ -31,8 +31,8 @@ tp = treeplot!(
 treelabels!(tp.nodepoints; depth = tp.maxtreedepth[] + 0.1)
 scatter!(tp.orderedpoints, markersize = 30, color = rand(9))
 treecladelabel!(tp.nodepoints, lineoffset = 0.3, color = (:green))
-treearea!(tp.nodepoints; nodes = [tree, tree[1]], strokecolor = (:black, 0.2))
-treearea!(tp.nodepoints; nodes = [tree[2], tree[2][2]], strokecolor = (:black, 0.2))
+treehilight!(tp.nodepoints; nodes = [tree, tree[1]], strokecolor = (:black, 0.2))
+treehilight!(tp.nodepoints; nodes = [tree[2], tree[2][2]], strokecolor = (:black, 0.2))
 
 
 ax2 = PolarAxis(fig[1, 2], rautolimitmargin = (0.0, 0.2))
@@ -47,7 +47,7 @@ treecladelabel!(
     lineoffset = (1.7, 1.5),
 )
 treecladelabel!(tp.nodepoints; lineoffset = 2.5, color = :green, labeloffset = (-2.0, -2.0))
-treearea!(
+treehilight!(
     tp.nodepoints;
     nodes = [(:a, :b), (:c, (:d, :e)), (:d, :e)],
     resolution = 25,

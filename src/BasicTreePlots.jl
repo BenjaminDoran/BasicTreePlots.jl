@@ -10,7 +10,13 @@ const LAYOUTS = (:dendrogram, :cladogram, :radial)
 const BRANCHTYPES = (:square, :straight)
 
 export treeplot,
-    treeplot!, treelabels, treelabels!, treecladelabel, treecladelabel!, treearea, treearea!
+    treeplot!,
+    treelabels,
+    treelabels!,
+    treecladelabel,
+    treecladelabel!,
+    treehilight,
+    treehilight!
 
 
 # Documentation for plotting functions are in extensions
@@ -26,8 +32,8 @@ function treecladelabel end
 function treecladelabel! end
 
 
-function treearea end
-function treearea! end
+function treehilight end
+function treehilight! end
 
 # public distance, label
 

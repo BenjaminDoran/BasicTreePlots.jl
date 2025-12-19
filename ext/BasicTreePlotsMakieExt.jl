@@ -8,8 +8,8 @@ import BasicTreePlots:
     treelabels!,
     treecladelabel,
     treecladelabel!,
-    treearea,
-    treearea!
+    treehilight,
+    treehilight!
 
 using Makie
 using Makie: Point2f, @recipe, automatic, Polar, Polygon
@@ -51,7 +51,7 @@ end
 fig
 ```
 
-This can then be annotated with `treearea`, `treelabels`, and `treecladelabel` plots
+This can then be annotated with `treehilight`, `treelabels`, and `treecladelabel` plots
 """
 @recipe TreePlot (tree,) begin
 
@@ -601,20 +601,20 @@ function Makie.plot!(plt::TreeCladeLabel)
     )
 end
 
-# treearea ====================================================================================
+# treehilight ====================================================================================
 """
-	treearea!(nodepoints::OrderedDict(node => coordinate); nodes = [node1, node2])
+	treehilight!(nodepoints::OrderedDict(node => coordinate); nodes = [node1, node2])
 
 # Examples
 
 ```
 tree = ((:a, :b), (:c, (:d, :e)))
 fig, ax, tp = treeplot(tree)
-treearea!(tp.nodepoints; nodes=[tree[1], (:d, :e)])
+treehilight!(tp.nodepoints; nodes=[tree[1], (:d, :e)])
 fig
 ```
 """
-@recipe TreeArea (nodepoints,) begin
+@recipe TreeHilight (nodepoints,) begin
     """
     List of nodes for which to draw surrounding regions.
     Assumes that each node and decendent node is accessible as `nodepoints[node]`. `nodepoints` can be accessed
@@ -662,7 +662,7 @@ fig
     Makie.mixin_generic_plot_attributes()...
 end
 
-function Makie.plot!(plt::TreeArea)
+function Makie.plot!(plt::TreeHilight)
     map!(
         plt.attributes,
         [:nodepoints, :nodes, :resolution, :padding, :transform_func],

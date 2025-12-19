@@ -1,4 +1,26 @@
 
+function parse_args(ARGS)
+    args = @tuplearguments begin
+        @argumentflag liveserver "--liveserver"
+        @argumentflag excludetutorials "--exclude-tutorials"
+        @argumentflag verbose "-v" "--verbose"
+    end
+    return args
+end
+
+function nested_filter(x, regex)
+    _match(x::String) = match(regex, x) !== nothing
+    _match(x::Pair) = x[2] isa String ? match(regex, x[2]) !== nothing : true
+    fn(el::Pair) = el[2] isa Vector ? el[1] => nested_filter(el[2], regex) : el
+    fn(el) = el
+    return filter(_match, map(fn, x))
+end
+
+unnest(vec::Vector) = collect(Iterators.flatten([unnest(el) for el in vec]))
+unnest(p::Pair) = p[2] isa String ? [p[2]] : unnest(p[2])
+unnest(s::String) = [s]
+
+
 function _generate_literate_docs(dir_in, dir_out, liveserver)
     # Run Literate on all examples
     for (IN, OUT) in [(dir_in, dir_out)]

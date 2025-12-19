@@ -2,11 +2,10 @@
 using Pkg: Pkg
 Pkg.activate(@__DIR__)
 Pkg.instantiate()
-
 cd(@__DIR__)
 
-using TimerOutputs
 using ArgMacros
+using TimerOutputs
 using LiveServer: LiveServer
 
 if "--liveserver" ∈ ARGS
@@ -33,32 +32,10 @@ const GALLERY_IN = joinpath(@__DIR__, "src", "literate-gallery")
 const GALLERY_OUT = joinpath(@__DIR__, "src", "gallery")
 const changelogfile = joinpath(repo_root, "CHANGELOG.md")
 
-
-function parse_args(ARGS)
-    args = @tuplearguments begin
-        @argumentflag liveserver "--liveserver"
-        @argumentflag excludetutorials "--exclude-tutorials"
-        @argumentflag verbose "-v" "--verbose"
-    end
-    return args
-end
-
 include("helpers/helpers.jl")
 include("helpers/figure_block.jl")
 include("helpers/attrdocs_block.jl")
 include("helpers/shortdocs_block.jl")
-
-function nested_filter(x, regex)
-    _match(x::String) = match(regex, x) !== nothing
-    _match(x::Pair) = x[2] isa String ? match(regex, x[2]) !== nothing : true
-    fn(el::Pair) = el[2] isa Vector ? el[1] => nested_filter(el[2], regex) : el
-    fn(el) = el
-    return filter(_match, map(fn, x))
-end
-
-unnest(vec::Vector) = collect(Iterators.flatten([unnest(el) for el in vec]))
-unnest(p::Pair) = p[2] isa String ? [p[2]] : unnest(p[2])
-unnest(s::String) = [s]
 
 function main(ARGS)
     args = parse_args(ARGS)

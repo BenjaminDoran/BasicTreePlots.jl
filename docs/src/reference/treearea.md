@@ -1,5 +1,5 @@
-# treearea
+# treehilight
 
 ```@docs; canonical=false
-treearea
+treehilight
 ```
