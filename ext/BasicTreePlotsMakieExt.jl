@@ -4,6 +4,8 @@ using BasicTreePlots: BasicTreePlots
 import BasicTreePlots:
     treeplot,
     treeplot!,
+    treescatter,
+    treescatter!,
     treelabels,
     treelabels!,
     treecladelabel,
@@ -41,9 +43,9 @@ layoutstyles = (:dendrogram, :cladogram)
 branchstyles = (:square, :straight)
 for i in 1:2, j in 1:2
 ax, tp = treeplot(fig[i,j], tree;
-    layoutstyle=layoutstyles[i],
-    branchstyle=branchstyles[j],
-    axis=(; title=join([layoutstyles[i]), ", ", branchstyles[j]])
+	layoutstyle=layoutstyles[i],
+	branchstyle=branchstyles[j],
+	axis=(; title=join([layoutstyles[i]), ", ", branchstyles[j]])
 )
 treelabels!(tp.nodepoints)
 scatter!(tp.orderedpoints)
@@ -123,7 +125,7 @@ This can then be annotated with `treehilight`, `treelabels`, and `treecladelabel
     openangle = 0
 
     """
-    If `true` draw guide lines from each leaf tip to the depth of the leaf that is maximally distant from root.
+    If `true` draw lines of each leaf tip to the depth of the leaf that is maximally distant from root.
     Useful for connecting leaves to there location on the y axis (or θ axis if plotted on `PolarAxis`).
     """
     usemaxdepth = false
@@ -290,6 +292,28 @@ function Makie.plot!(plt::TreePlot)
     Makie.lines!(plt, plt.attributes, plt.expandedbranchsegments;)
 end
 
+# treescatter ====================================================================================
+"""
+	treescatter(tp::TreePlot; kwargs...)
+	treescatter!(tp::TreePlot; kwargs...)
+
+Equivalent to calling `Makie.scatter!(tp.orderedpoints; kwargs...)`. The `tp.orderedpoints` is a `Point2f[]` vector
+holding the coordinates of each node in the tree in the order returned by `AbstractTrees.PreOrderDFS`.
+"""
+BasicTreePlots.treescatter!(tp::Plot{treeplot}; kwargs...) =
+    scatter!(tp.orderedpoints; kwargs...)
+BasicTreePlots.treescatter(tp::Plot{treeplot}; kwargs...) =
+    scatter(tp.orderedpoints; kwargs...)
+BasicTreePlots.treescatter!(
+    ax::Union{Makie.Block,Makie.GridPosition},
+    tp::Plot{treeplot};
+    kwargs...,
+) = scatter!(ax, tp.orderedpoints; kwargs...)
+BasicTreePlots.treescatter(
+    ax::Union{Makie.Block,Makie.GridPosition},
+    tp::Plot{treeplot};
+    kwargs...,
+) = scatter(ax, tp.orderedpoints; kwargs...)
 
 
 # treelabels ====================================================================================
@@ -369,6 +393,13 @@ treelabels!(p.nodepoints; nodelabels=Dict(node1 => "Node 1", node_a => "My speci
     Makie.mixin_generic_plot_attributes()...
 end
 
+# I think this covers the main ways of calling the functions with a treeplot directly
+treelabels!(plt::TreePlot; kwargs...) = treelabels!(plt.nodepoints; kwargs...)
+treelabels(plt::TreePlot; kwargs...) = treelabels(plt.nodepoints; kwargs...)
+treelabels!(ax::Union{Makie.Block,Makie.GridPosition}, plt::TreePlot; kwargs...) =
+    treelabels!(ax, plt.nodepoints; kwargs...)
+treelabels(ax::Union{Makie.Block,Makie.GridPosition}, plt::TreePlot; kwargs...) =
+    treelabels(ax, plt.nodepoints; kwargs...)
 function Makie.plot!(plt::TreeLabels)
     map!(
         plt.attributes,
@@ -519,6 +550,13 @@ end
 
 _unzip(a) = collect(getfield.(a, fld) for fld in fieldnames(eltype(a)))
 
+# I think this covers the main ways of calling the functions with a treeplot directly
+treecladelabel!(plt::TreePlot; kwargs...) = treecladelabel!(plt.nodepoints; kwargs...)
+treecladelabel(plt::TreePlot; kwargs...) = treecladelabel(plt.nodepoints; kwargs...)
+treecladelabel!(ax::Union{Makie.Block,Makie.GridPosition}, plt::TreePlot; kwargs...) =
+    treecladelabel!(ax, plt.nodepoints; kwargs...)
+treecladelabel(ax::Union{Makie.Block,Makie.GridPosition}, plt::TreePlot; kwargs...) =
+    treecladelabel(ax, plt.nodepoints; kwargs...)
 function Makie.plot!(plt::TreeCladeLabel)
     inputs = [
         :nodepoints,
@@ -636,17 +674,17 @@ fig
     color = @inherit patchcolor
     """
        Sets the alpha value of the shaded region in the tree area.
-       """
+    """
     alpha = @inherit alpha 0.25
     resolution = 30
 
     # Stroke
-    "Color of stroke around shaded region. If `:transparent` (default) stroke wont be seen."
+    "Color of stroke around shaded region."
     strokecolor = (:black, 1.0)
     "Width of stroke line around shaded region"
     strokewidth = @inherit strokewidth 0.0
     # "Style of stroke around region"
-    strokestyle = @inherit linestyle :solid
+    # strokestyle = @inherit linestyle :solid
     """
        Sets which attributes to cycle when creating multiple plots. The values to
        cycle through are defined by the parent Theme. Multiple cycled attributes can
@@ -662,6 +700,13 @@ fig
     Makie.mixin_generic_plot_attributes()...
 end
 
+# I think this covers the main ways of calling the functions with a treeplot directly
+treehilight!(plt::TreePlot; kwargs...) = treehilight!(plt.nodepoints; kwargs...)
+treehilight(plt::TreePlot; kwargs...) = treehilight(plt.nodepoints; kwargs...)
+treehilight!(ax::Union{Makie.Block,Makie.GridPosition}, plt::TreePlot; kwargs...) =
+    treehilight!(ax, plt.nodepoints; kwargs...)
+treehilight(ax::Union{Makie.Block,Makie.GridPosition}, plt::TreePlot; kwargs...) =
+    treehilight(ax, plt.nodepoints; kwargs...)
 function Makie.plot!(plt::TreeHilight)
     map!(
         plt.attributes,
@@ -708,14 +753,7 @@ function Makie.plot!(plt::TreeHilight)
     end
 
 
-    p = Makie.poly!(
-        plt,
-        plt.attributes,
-        plt.clade_regions;
-        # color = plt.fillcolor,
-        linestyle = plt.strokestyle,
-    )
-
+    p = Makie.poly!(plt, plt.attributes, plt.clade_regions;)
     Makie.translate!(p, 0, 0, plt.z_shift[])
 end
 

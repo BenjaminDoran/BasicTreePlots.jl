@@ -1,16 +1,20 @@
 module BasicTreePlots
 
-using Reexport: Reexport
+using Reexport: Reexport, @reexport
 using Statistics: mean
-using AbstractTrees: nodevalue, children, PreOrderDFS
+using AbstractTrees: nodevalue, children
+@reexport using AbstractTrees: PreOrderDFS
 using OrderedCollections: OrderedDict
 # using Makie: Point2f
+
 
 const LAYOUTS = (:dendrogram, :cladogram, :radial)
 const BRANCHTYPES = (:square, :straight)
 
 export treeplot,
     treeplot!,
+    treescatter,
+    treescatter!,
     treelabels,
     treelabels!,
     treecladelabel,
@@ -19,9 +23,13 @@ export treeplot,
     treehilight!
 
 
+
 # Documentation for plotting functions are in extensions
 function treeplot end
 function treeplot! end
+
+function treescatter end
+function treescatter! end
 
 
 function treelabels end
