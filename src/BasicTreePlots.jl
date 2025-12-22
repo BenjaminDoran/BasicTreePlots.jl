@@ -271,8 +271,8 @@ end
 
 
 function tipannotations(nodedict)
-    res = [(v, label(k)) for (k, v) in nodedict if isleaf(k)]
-    first.(res), last.(res)
+    res = [(k, v, label(k)) for (k, v) in nodedict if isleaf(k)]
+    first.(res), getindex.(res, 2), last.(res)
 end
 
 end # module

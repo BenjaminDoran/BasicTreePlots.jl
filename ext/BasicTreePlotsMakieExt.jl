@@ -24,12 +24,12 @@ toangle(y, N, openangle) = (y / N) * (2π - (openangle % 2pi))
 # treeplot ====================================================================================
 
 """
-	treeplot(tree; kwargs...)
+treeplot(tree; kwargs...)
 
 # Args:
 
 - tree, the root node of a tree that has `AbstractTrees.children()` defined.
-	All nodes should be reachable by using `AbstractTrees.PreOrderDFS()` iterator.
+All nodes should be reachable by using `AbstractTrees.PreOrderDFS()` iterator.
 
 # Examples
 
@@ -43,9 +43,9 @@ layoutstyles = (:dendrogram, :cladogram)
 branchstyles = (:square, :straight)
 for i in 1:2, j in 1:2
 ax, tp = treeplot(fig[i,j], tree;
-	layoutstyle=layoutstyles[i],
-	branchstyle=branchstyles[j],
-	axis=(; title=join([layoutstyles[i]), ", ", branchstyles[j]])
+layoutstyle=layoutstyles[i],
+branchstyle=branchstyles[j],
+axis=(; title=join([layoutstyles[i]), ", ", branchstyles[j]])
 )
 treelabels!(tp.nodepoints)
 scatter!(tp.orderedpoints)
@@ -190,8 +190,7 @@ function Makie.plot!(plt::TreePlot)
             end
         end
 
-        branchsegments =
-            BasicTreePlots.makesegments(nodepoints, tree; branchstyle, resolution)
+        branchsegments = BasicTreePlots.makesegments(nodepoints, tree; branchstyle, resolution)
 
         if orientation !== :right && tf isa Polar
             @warn("Orientation of $orientation is not well tested on PolarAxis")
@@ -265,11 +264,7 @@ function Makie.plot!(plt::TreePlot)
     end
 
     # Setup linecolor
-    map!(
-        plt.attributes,
-        [:branchcolor, :branchsegments],
-        :color,
-    ) do branchcolor, branchsegments
+    map!(plt.attributes, [:branchcolor, :branchsegments], :color) do branchcolor, branchsegments
         if branchcolor isa Union{AbstractVector,AbstractRange}
             return repeat(branchcolor, inner = length(first(branchsegments)))
         end
@@ -277,11 +272,7 @@ function Makie.plot!(plt::TreePlot)
     end
 
     # Setup linewidth
-    map!(
-        plt.attributes,
-        [:branchwidth, :branchsegments],
-        :linewidth,
-    ) do branchwidth, branchsegments
+    map!(plt.attributes, [:branchwidth, :branchsegments], :linewidth) do branchwidth, branchsegments
         if branchwidth isa Union{AbstractVector,AbstractRange}
             return repeat(branchwidth, inner = length(first(branchsegments)))
         end
@@ -294,21 +285,22 @@ end
 
 # treescatter ====================================================================================
 """
-	treescatter(tp::TreePlot; kwargs...)
-	treescatter!(tp::TreePlot; kwargs...)
+treescatter(tp::TreePlot; kwargs...)
+treescatter!(tp::TreePlot; kwargs...)
 
 Equivalent to calling `Makie.scatter!(tp.orderedpoints; kwargs...)`. The `tp.orderedpoints` is a `Point2f[]` vector
 holding the coordinates of each node in the tree in the order returned by `AbstractTrees.PreOrderDFS`.
 """
-BasicTreePlots.treescatter!(tp::Plot{treeplot}; kwargs...) =
-    scatter!(tp.orderedpoints; kwargs...)
-BasicTreePlots.treescatter(tp::Plot{treeplot}; kwargs...) =
-    scatter(tp.orderedpoints; kwargs...)
+BasicTreePlots.treescatter!(tp::Plot{treeplot}; kwargs...) = scatter!(tp.orderedpoints; kwargs...)
+
+BasicTreePlots.treescatter(tp::Plot{treeplot}; kwargs...) = scatter(tp.orderedpoints; kwargs...)
+
 BasicTreePlots.treescatter!(
     ax::Union{Makie.Block,Makie.GridPosition},
     tp::Plot{treeplot};
     kwargs...,
 ) = scatter!(ax, tp.orderedpoints; kwargs...)
+
 BasicTreePlots.treescatter(
     ax::Union{Makie.Block,Makie.GridPosition},
     tp::Plot{treeplot};
@@ -351,7 +343,12 @@ treelabels!(p.nodepoints; nodelabels=Dict(node1 => "Node 1", node_a => "My speci
     nodelabels = nothing
 
     """
-    Depth <: Real 'distance from root' in data space at which to plot tree text labels.
+    Available options:
+    `nothing` (default) in which case the anchorpoints for the labels are directly on the nodes being labeled.
+    `depth=:align`, Places the anchorpoints at a constant depth equal to the leaf node maximally distant from the root.
+    `depth=<:Real`, sets the custom constant depth at which the label anchorpoints are set.
+    `depth=(node,pos)->Point2f`, Determines a custom function that takes a node and its coordinate and returns
+    where the label anchorpoint should be.
     """
     depth = nothing
 
@@ -373,7 +370,14 @@ treelabels!(p.nodepoints; nodelabels=Dict(node1 => "Node 1", node_a => "My speci
     labelalign = automatic
 
     """
-    Offset in data space to push text label anchor points.
+    Offset in pixel space to push text label anchor points. Available options:
+    `automatic` (default) if plotting on `Axis()` the offset is (5px, 0), if on `PolarAxis()` the default is
+    `5px * (cos(θ), sin(θ))` where θ is the radian angle of the node.
+    `labeloffset=Tuple{<:Real, <:Real}`, if plotting on an `Axis` provide `(x,y)`, if on `PolarAxis` provide `(θ, r)`
+    in pixel units for the offset relative to the label anchorpoint.
+    `labeloffset::Function=(node,pos)->(x px, y px)`, Provide a custom function that takes a node and its coordinate
+    in dataspace and return a pixel space offset. Note that pixel space does not get converted like the `PolarAxis`,
+    so conversion of coordinates may be required `r_off * (cos(θ+θ_off), sin(θ+θ_off))`.
     """
     labeloffset = automatic
 
@@ -412,16 +416,18 @@ function Makie.plot!(plt::TreeLabels)
             :labeloffset,
             :transform_func,
         ],
-        [:label_points, :labels, :align, :rotation, :guides_points], # outputs
+        [:label_points, :labels, :align, :rotation, :offset, :guides_points], # outputs
     ) do nodepoints, nodelabels, depth, lalign, lrotation, loffset, tf
         ## Get all tip positions and labels
         if isnothing(nodelabels)
-            label_points_start, labels = BasicTreePlots.tipannotations(nodepoints)
+            labeled_nodes, label_points_start, labels = BasicTreePlots.tipannotations(nodepoints)
         else
             labels = []
+            labeled_nodes = []
             label_points_start = Point2f[]
             for (node, label) in nodelabels
                 push!(labels, label)
+                push!(labeled_nodes, node)
                 push!(label_points_start, nodepoints[node])
             end
         end
@@ -430,10 +436,27 @@ function Makie.plot!(plt::TreeLabels)
         guides_points = Point2f[]
         if !isnothing(depth)
             label_points_end = # update to max depth
-                if tf isa Polar
-                    map(pos -> Point2f(pos[1], depth), label_points_start)
+                if depth === :align
+                    if tf isa Polar
+                        maxdepth = maximum(x -> x[2], values(nodepoints))
+                        map(pos -> Point2f(pos[1], maxdepth), label_points_start)
+                    else
+                        maxdepth = maximum(x -> x[1], values(nodepoints))
+                        map(pos -> Point2f(maxdepth, pos[2]), label_points_start)
+                    end
+                elseif depth isa Real
+                    if tf isa Polar
+                        map(pos -> Point2f(pos[1], depth), label_points_start)
+                    else
+                        map(pos -> Point2f(depth, pos[2]), label_points_start)
+                    end
+                elseif depth isa Function
+                    depth.(labeled_nodes, label_points_start)
                 else
-                    map(pos -> Point2f(depth, pos[2]), label_points_start)
+                    @error """
+                    	Unrecognized option for `depth` = $depth
+                    	Options are `nothing`, `:align`, `depth<:Real`, `(node, pos)->newpos::Point2f`
+                    """
                 end
             for (beginpos, endpos) in zip(label_points_start, label_points_end)
                 push!(guides_points, beginpos)
@@ -441,21 +464,14 @@ function Makie.plot!(plt::TreeLabels)
                 push!(guides_points, Point2f(NaN, NaN))
             end
         end
+
         # finalize points for labels
-        ## Need to add offset to points directly in data space, because the text recipe uses pixel space
         label_points = !isnothing(depth) ? label_points_end : label_points_start
-        if loffset === automatic
-            if tf isa Polar
-                map!(pos -> pos + Point2f(0.0, 0.05), label_points)
-            else
-                map!(pos -> pos + Point2f(0.05, 0.0), label_points)
-            end
-        else
-            map!(pos -> pos + Point2f(loffset), label_points)
-        end
+
+        # set default rotation option
+        lrot = lrotation === automatic ? tf isa Polar ? :aligned : :horizontal : lrotation
 
         # Handle rotation and alignment of labels, particularly for the Polar axis
-        lrot = lrotation === automatic ? tf isa Polar ? :aligned : :horizontal : lrotation
         if lrot isa Real
             rotation = lrot
         elseif lrot isa AbstractArray{<:Number}
@@ -475,9 +491,28 @@ function Makie.plot!(plt::TreeLabels)
             rotation = lrot
         end
 
+        # Alignment of text; left-center by default unless provided or rotation=:aligned
         align = lalign === automatic ? (:left, :center) : lalign
 
-        return label_points, labels, align, rotation, guides_points
+        # Compute label offsets in pixel space either in polar or cartisian coordinates
+        offset = if loffset === automatic
+            if tf isa Polar
+                map((θ, r)->(5*cos(θ), 5*sin(θ)), label_points)
+            else
+                (5, 0)
+            end
+        elseif loffset isa Tuple{<:Real,<:Real} && tf isa Polar
+            toff, roff = loffset
+            map(label_points) do (θ, r)
+                roff .* (cos(θ+toff), sin(θ+toff))
+            end
+        elseif loffset isa Function
+            loffset.(labeled_nodes, label_points)
+        else
+            loffset
+        end
+
+        return label_points, labels, align, rotation, offset, guides_points
     end
 
     Makie.lines!(
@@ -497,7 +532,7 @@ end
 
 # treecladelabel ==============================================================================
 """
-	treecladelabel(nodepoints::OrderedDict(node=>point); nodelabels=[node1 => "Node 1", node2 => "Node 2"])
+treecladelabel(nodepoints::OrderedDict(node=>point); nodelabels=[node1 => "Node 1", node2 => "Node 2"])
 
 # Examples
 
@@ -582,8 +617,7 @@ function Makie.plot!(plt::TreeCladeLabel)
         end
 
         ## repeat line offset if single number so that zip(nodelabels, lineoffset) works
-        lineoffset =
-            lineoffset isa Real ? repeat([lineoffset], length(nodelabels)) : lineoffset
+        lineoffset = lineoffset isa Real ? repeat([lineoffset], length(nodelabels)) : lineoffset
 
         ## For each clade => cladelabel
         line_points, label_positions, labels, rotation =
@@ -598,18 +632,14 @@ function Makie.plot!(plt::TreeCladeLabel)
 
                 ## Make line
                 line_points = Point2f[
-                    ((depth+loff, y) for y ∈ range(
-                        widthmin-linepadding,
-                        widthmax+linepadding,
-                        lineresolution,
-                    ))...,
+                    ((depth+loff, y) for
+                     y ∈ range(widthmin-linepadding, widthmax+linepadding, lineresolution))...,
                     (NaN, NaN),
                 ]
                 line_points = tf isa Polar ? reverse.(line_points) : line_points
 
                 ## Put label at center of line
-                label_position =
-                    Point2f(depth + loff, widthmin + ((widthmax - widthmin) / 2))
+                label_position = Point2f(depth + loff, widthmin + ((widthmax - widthmin) / 2))
                 label_position = tf isa Polar ? reverse(label_position) : label_position
 
                 ## Transform coordinate if plotting in Polar Axis
@@ -641,7 +671,7 @@ end
 
 # treehilight ====================================================================================
 """
-	treehilight!(nodepoints::OrderedDict(node => coordinate); nodes = [node1, node2])
+treehilight!(nodepoints::OrderedDict(node => coordinate); nodes = [node1, node2])
 
 # Examples
 
