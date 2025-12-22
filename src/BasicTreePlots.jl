@@ -46,7 +46,7 @@ function treehilight! end
 # public distance, label
 
 """
-	distance(node)
+    distance(node)
 
 return scaler distance from node to parent of node. Defaults to `1`
 
@@ -56,7 +56,7 @@ distance() = 1.0f0
 distance(node) = 1.0f0
 
 """
-	label(node)
+    label(node)
 
 return string typed value or description of node.
 
@@ -72,8 +72,8 @@ leafcount(t) = mapreduce(isleaf, +, PreOrderDFS(t))
 
 
 """
-	ladderize!([fun::Function, agg::Function,] tree; rev=false)
-	ladderize([fun::Function, agg::Function,] tree; rev=false)
+    ladderize!([fun::Function, agg::Function,] tree; rev=false)
+    ladderize([fun::Function, agg::Function,] tree; rev=false)
 
 Perform inplace sorting 'ladderization' of the children of each node in the provided tree
 based on user provided scaler functions `fun` and aggregating function `agg`. `ladderize`
@@ -86,7 +86,7 @@ will sort the tree by the node's count of descendents.
 * `fun::Function`: function that takes leaves of the tree and outputs scaler value
 * `agg::Function`: aggregating function, takes collection of outputs from `fun` and returns scaler output
 * `tree`: tree object that fulfills `AbstractTrees` interface. `AbstractTrees.children(node)`
-	should provide sortable collection children of the node.
+    should provide sortable collection children of the node.
 * `rev::Bool=false`: whether to sort children of each node in acending (default) or desending order.
 
 # Examples
@@ -101,7 +101,7 @@ tree = ladderize(tree)
 
 ```
 ladderize!(mean, tree) do leaf
-	leafdata_dict[name(leaf)]["fitness"]
+    leafdata_dict[name(leaf)]["fitness"]
 end
 ```
 """
