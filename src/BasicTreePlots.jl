@@ -275,4 +275,6 @@ function tipannotations(nodedict)
     first.(res), getindex.(res, 2), last.(res)
 end
 
+polaroffset(pos, off) = off[2] .* (cos(pos[1] + off[1]), sin(pos[1] + off[1]))
+
 end # module
