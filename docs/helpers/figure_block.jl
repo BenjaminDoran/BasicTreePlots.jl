@@ -30,8 +30,7 @@ struct AsMIME{M<:MIME,V}
     value::V
 end
 
-Base.show(io::IO, m::MIME"image/svg+xml", a::AsMIME{MIME"image/svg+xml"}) =
-    show(io, m, a.value)
+Base.show(io::IO, m::MIME"image/svg+xml", a::AsMIME{MIME"image/svg+xml"}) = show(io, m, a.value)
 Base.show(io::IO, m::MIME"image/png", a::AsMIME{MIME"image/png"}) = show(io, m, a.value)
 
 function register_figure!(page, pagetitle, id, figurelike)

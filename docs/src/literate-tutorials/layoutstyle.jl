@@ -23,11 +23,6 @@ branchstyles = (:square, :straight)
 for i = 1:2, j = 1:2
     ax = PolarAxis(fig[i, j]; title = "$(layoutstyles[i]), $(branchstyles[j])")
     hidedecorations!(ax)
-    tp = treeplot!(
-        fig[i, j],
-        tree;
-        layoutstyle = layoutstyles[i],
-        branchstyle = branchstyles[j],
-    )
+    tp = treeplot!(fig[i, j], tree; layoutstyle = layoutstyles[i], branchstyle = branchstyles[j])
 end
 fig

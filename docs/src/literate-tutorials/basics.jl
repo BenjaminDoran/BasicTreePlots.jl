@@ -102,9 +102,8 @@ fig
 
 # For instance if we have external data about each node in the tree
 
-tree_data = Dict(
-    node => (; support = rand(), favorite_number = rand(1:5)) for node in PreOrderDFS(tree)
-)
+tree_data =
+    Dict(node => (; support = rand(), favorite_number = rand(1:5)) for node in PreOrderDFS(tree))
 
 # then we can plot support as the color and the favorite number as the line width.
 

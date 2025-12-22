@@ -6,13 +6,8 @@ using CairoMakie, BasicTreePlots
 
 
 tree = ((:a, :b), (:c, (:d, :e)))
-nodelabels = (
-    :a => "Alpha",
-    :b => "Bravo",
-    (:a, :b) => "Parent",
-    (:a, :b) => "Parent",
-    :d => "Delta",
-)
+nodelabels =
+    (:a => "Alpha", :b => "Bravo", (:a, :b) => "Parent", (:a, :b) => "Parent", :d => "Delta")
 bcolor = rand(9);
 
 fig = Figure(size = (1000, 500))
@@ -21,13 +16,7 @@ ax1 = Axis(fig[1, 1], xautolimitmargin = (0.05, 0.1))
 hidedecorations!(ax1)
 hidespines!(ax1)
 
-tp = treeplot!(
-    tree,
-    branchwidth = 3,
-    colormap = :vik,
-    visible = true,
-    branchstyle = :straight,
-)
+tp = treeplot!(tree, branchwidth = 3, colormap = :vik, visible = true, branchstyle = :straight)
 treelabels!(tp.nodepoints; depth = tp.maxtreedepth[] + 0.1)
 scatter!(tp.orderedpoints, markersize = 30, color = rand(9))
 treecladelabel!(tp.nodepoints, lineoffset = 0.3, color = (:green))

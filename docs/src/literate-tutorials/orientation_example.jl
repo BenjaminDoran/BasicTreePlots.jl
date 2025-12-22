@@ -5,20 +5,10 @@ tree = (((:a, :b), :c), (:d, (:e, :f)))
 
 begin
     fig = Figure(size = (600, 600))
-    treeplot(
-        fig[1, 1],
-        tree,
-        orientation = :right,
-        axis = (; title = "orientation = :right"),
-    )
+    treeplot(fig[1, 1], tree, orientation = :right, axis = (; title = "orientation = :right"))
     treeplot(fig[1, 2], tree, orientation = :left, axis = (; title = "orientation = :left"))
     treeplot(fig[2, 1], tree, orientation = :top, axis = (; title = "orientation = :top"))
-    treeplot(
-        fig[2, 2],
-        tree,
-        orientation = :bottom,
-        axis = (; title = "orientation = :bottom"),
-    )
+    treeplot(fig[2, 2], tree, orientation = :bottom, axis = (; title = "orientation = :bottom"))
     fig
 end
 

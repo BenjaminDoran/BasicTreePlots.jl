@@ -37,8 +37,7 @@ function attrs_examples_docs_defaults(type::Type{<:Makie.Plot})
     attrkeys = sort(collect(keys(metadata)))
     all_examples = Makie.attribute_examples(type)
     all_docs = Dict([
-        (attr => something(meta.docstring, "No docs available.")) for
-        (attr, meta) in metadata
+        (attr => something(meta.docstring, "No docs available.")) for (attr, meta) in metadata
     ])
     all_defaults = Dict([(attr => meta.default_expr) for (attr, meta) in metadata])
 
@@ -85,12 +84,7 @@ function Documenter.Selectors.runner(::Type{AttrdocsBlocks}, node, page, doc)
     # treatment to headings that documenter would normally do (which does not happen in the nested expand pipeline)
     # and for running the @figure nodes
     for childnode in collect(node.children)
-        Documenter.Selectors.dispatch(
-            Documenter.Expanders.ExpanderPipeline,
-            childnode,
-            page,
-            doc,
-        )
+        Documenter.Selectors.dispatch(Documenter.Expanders.ExpanderPipeline, childnode, page, doc)
         Documenter.expand_recursively(childnode, page, doc)
     end
 

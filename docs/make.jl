@@ -87,8 +87,7 @@ function main(ARGS)
     reference_pages =
         "Reference" => [
             joinpath("reference", file) for
-            file in readdir(joinpath(@__DIR__, "src", "reference")) if
-            last(splitext(file)) == ".md"
+            file in readdir(joinpath(@__DIR__, "src", "reference")) if last(splitext(file)) == ".md"
         ]
 
     pages = [

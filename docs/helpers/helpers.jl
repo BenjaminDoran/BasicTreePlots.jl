@@ -94,8 +94,7 @@ function _create_documenter_changelog(DIR)
     """
     content = replace(
         content,
-        last_sentence_before_content =>
-            last_sentence_before_content * "\n\n" * contents_block,
+        last_sentence_before_content => last_sentence_before_content * "\n\n" * contents_block,
     )
     # Remove trailing lines
     content = strip(content) * "\n"
@@ -121,9 +120,7 @@ function _fix_links()
     for l in sort!(collect(github_links); by = first)
         println(io, l[1], ": ", l[2])
     end
-    content = replace(
-        content,
-        r"<!-- GitHub pull request/issue links -->.*$"ms => String(take!(io)),
-    )
+    content =
+        replace(content, r"<!-- GitHub pull request/issue links -->.*$"ms => String(take!(io)))
     write(changelogfile, content)
 end
