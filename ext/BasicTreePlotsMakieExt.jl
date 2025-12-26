@@ -373,6 +373,7 @@ treelabels!(p.nodepoints; nodelabels=Dict(node1 => "Node 1", node_a => "My speci
     Offset in pixel space to push text label anchor points. Available options:
     `automatic` (default) if plotting on `Axis()` the offset is (5px, 0), if on `PolarAxis()` the default is
     `5px * (cos(θ), sin(θ))` where θ is the radian angle of the node.
+    `labeloffset::Real` defaults to offsetting the label in pixels toward the x direction for `Axis`` and in radius for `PolarAxis`
     `labeloffset=Tuple{<:Real, <:Real}`, if plotting on an `Axis` provide `(x,y)`, if on `PolarAxis` provide `(θ, r)`
     in pixel units for the offset relative to the label anchorpoint.
     `labeloffset::Function=(node,pos)->(x px, y px)`, Provide a custom function that takes a node and its coordinate
@@ -497,14 +498,20 @@ function Makie.plot!(plt::TreeLabels)
         # Compute label offsets in pixel space either in polar or cartisian coordinates
         offset = if loffset === automatic
             if tf isa Polar
-                map((θ, r)->(5*cos(θ), 5*sin(θ)), label_points)
+                map((θ)->(5*cos(θ), 5*sin(θ)), first.(label_points))
             else
                 (5, 0)
             end
         elseif loffset isa Tuple{<:Real,<:Real} && tf isa Polar
             toff, roff = loffset
-            map(label_points) do (θ, r)
+            map(first.(label_points)) do θ
                 roff .* (cos(θ+toff), sin(θ+toff))
+            end
+        elseif loffset isa Real
+            if tf isa Polar
+                map((θ)->loffset .* (cos(θ), sin(θ)), first.(label_points))
+            else
+                (loffset, 0)
             end
         elseif loffset isa Function
             loffset.(labeled_nodes, label_points)
