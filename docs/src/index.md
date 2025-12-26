@@ -39,11 +39,11 @@ tree = ((:a, :b), (:c, :d))
 treeplot(tree)
 ```
 
-see [Tutorials](tutorials/basics.md) and [Gallery](gallery/simple_phylogeny.md) for more in depth examples
+see [Tutorials](tutorials/00-index.md) and [Gallery](gallery/00-index.md) for more in depth examples
 
 ## `treeplot()` documentation
 
-see [reference](reference/overview.md) for other function's documentation
+see [reference](reference/00-index.md) for other function's documentation
 
 ## Contributors
 

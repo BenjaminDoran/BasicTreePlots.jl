@@ -35,7 +35,8 @@ LiveServer.servedocs(;
     include_files = String[
         joinpath(repo_root, "docs/generate.jl"),
         # Watch the index files in the skip_dirs folders
-        joinpath(repo_root, "docs/src/tutorials/index.md"),
+        joinpath(repo_root, "docs/src/tutorials/00-index.md"),
+        joinpath(repo_root, "docs/src/gallery/00-index.md"),
         joinpath(repo_root, "docs/changelog.jl"),
         joinpath(repo_root, "CHANGELOG.md"),
     ],

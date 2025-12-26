@@ -7,7 +7,7 @@ tree =
 tree = BasicTreePlots.ladderize!(tree)
 
 fig = Figure(size = (800, 800))
-ax = PolarAxis(fig[1, 1]; rautolimitmargin = (0.0, 0.4))
+ax = PolarAxis(fig[1, 1]; rautolimitmargin = (0.0, 0.75))
 hidedecorations!(ax)
 hidespines!(ax)
 
@@ -23,8 +23,8 @@ tp = treeplot!(
     usemaxdepth = true,
     branchcolor = :gainsboro,
 )
-treelabels!(tp.nodepoints; fontsize = 8, labeloffset = (0, 0.5))
-s = scatter!(tp.orderedpoints, color = log2.(c), colormap = :inferno, alpha = 0.5)
+treelabels!(tp; fontsize = 8, labeloffset = (0, 5))
+s = treescatter!(tp; color = log2.(c), colormap = :inferno, alpha = 0.5)
 
 Colorbar(fig[1, 2][3, 1], s, label = "# leafs (log2)")
 fig

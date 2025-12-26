@@ -196,8 +196,8 @@ function Makie.plot!(plt::TreePlot)
             @warn("Orientation of $orientation is not well tested on PolarAxis")
         end
 
-        if orientation === :right
-        elseif orientation === :left
+        if orientation === :right || orientation === :out
+        elseif orientation === :left || orientation === :in
             map!(values(nodepoints)) do (x, y)
                 (-x + maxtreedepth + maxdoff, y)
             end
@@ -291,10 +291,8 @@ treescatter!(tp::TreePlot; kwargs...)
 Equivalent to calling `Makie.scatter!(tp.orderedpoints; kwargs...)`. The `tp.orderedpoints` is a `Point2f[]` vector
 holding the coordinates of each node in the tree in the order returned by `AbstractTrees.PreOrderDFS`.
 """
-BasicTreePlots.treescatter!(tp::Plot{treeplot}; kwargs...) = scatter!(tp.orderedpoints; kwargs...)
-
 BasicTreePlots.treescatter(tp::Plot{treeplot}; kwargs...) = scatter(tp.orderedpoints; kwargs...)
-
+BasicTreePlots.treescatter!(tp::Plot{treeplot}; kwargs...) = scatter!(tp.orderedpoints; kwargs...)
 BasicTreePlots.treescatter!(
     ax::Union{Makie.Block,Makie.GridPosition},
     tp::Plot{treeplot};

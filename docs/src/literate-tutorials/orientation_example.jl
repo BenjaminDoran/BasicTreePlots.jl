@@ -25,19 +25,16 @@ begin
             yautolimitmargin = (0.05, 0.1),
         ),
     )
-    treelabels!(ax1, tp1.nodepoints, labeloffset = 0, labelalign = (:center, :top))
+    treelabels!(tp1; labeloffset = 0, labelalign = (:center, :top))
+
     ax2, tp2 = treeplot(
         fig[1, 2],
         tree,
         orientation = :bottom,
         axis = (; title = "orientation = :bottom", yautolimitmargin = (0.1, 0.05)),
     )
-    treelabels!(
-        ax2,
-        tp2.nodepoints,
-        labeloffset = 0,
-        labelalign = (:right, :top),
-        labelrotation = deg2rad(45),
-    )
+    treelabels!(ax2, tp2; labeloffset = 0, labelalign = (:right, :top), labelrotation = deg2rad(45))
+    hidexdecorations!(ax1)
+    hidexdecorations!(ax2)
     fig
 end

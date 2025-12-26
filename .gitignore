@@ -8,8 +8,10 @@ Manifest.toml
 benchmark/*.json
 coverage
 docs/build/
-docs/src/gallery/
-docs/src/tutorials/
+docs/src/gallery/*
+!docs/src/gallery/00-index.md
+docs/src/tutorials/*
+!docs/src/tutorials/00-index.md
 test/*.ipynb
 env
 node_modules
