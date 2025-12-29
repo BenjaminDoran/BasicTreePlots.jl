@@ -28,12 +28,12 @@ Or the development version with
 
 ```{julia}
 using Pkg
-Pkg.add("https://github.com/BenjaminDoran/BasicTreePlots.jl.git")
+Pkg.dev("https://github.com/BenjaminDoran/BasicTreePlots.jl.git#main")
 ```
 
 ## Basic usage
 
-```@figure
+```@example intro
 using CairoMakie, BasicTreePlots
 tree = ((:a, :b), (:c, :d))
 treeplot(tree)
