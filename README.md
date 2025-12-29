@@ -34,7 +34,7 @@ Or the development version with
 
 ```{julia}
 using Pkg
-Pkg.add("https://github.com/BenjaminDoran/BasicTreePlots.jl.git")
+Pkg.dev("https://github.com/BenjaminDoran/BasicTreePlots.jl.git#main")
 ```
 
 ## Basic usage
