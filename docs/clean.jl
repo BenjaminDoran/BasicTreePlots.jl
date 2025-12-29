@@ -13,6 +13,7 @@ append!(
     let literate_output = joinpath.(DIR, "src", ["examples", "tutorials", "howto", "gallery"])
         eachline(`git ls-files --other --directory $(literate_output)`)
     end,
+    ["src/changelog.md"],
 )
 
 for artifact in ARTIFACTS
