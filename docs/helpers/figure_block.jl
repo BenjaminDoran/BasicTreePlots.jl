@@ -13,6 +13,9 @@ import Makie
 import FileIO
 using BasicTreePlots
 
+const IS_CI = get(ENV, "CI", "false") == "true"
+const IMGDIR = IS_CI ? ".." : "."
+
 struct Png
     bytes::Vector{UInt8}
     size_px::Tuple{Int,Int}
@@ -95,7 +98,7 @@ function Base.show(io::IO, ::MIME"text/markdown", o::OverviewSection)
                 io,
                 """
             <a href="./$pagename.html#example-$(fileinfo.id)">
-                <img src=\"./$(fileinfo.filename)\" />
+                <img src=\"$IMGDIR/$(fileinfo.filename)\" />
             </a>
             """,
             )
@@ -130,7 +133,8 @@ function Base.show(io::IO, ::MIME"text/markdown", o::OverviewSection)
     """,
     )
 end
-end
+
+end # Module
 
 const IMAGE_COUNTER = Ref(0)
 
@@ -215,7 +219,7 @@ function Documenter.Selectors.runner(::Type{FigureBlocks}, node, page, doc)
         node,
         @ast Documenter.RawNode(
             :html,
-            "<img src=\"./$image_name\" width=\"$(size_px[1])px\" height=\"$(size_px[2])px\"/>",
+            "<img src=\"$(MakieDocsHelpers.IMGDIR)/$image_name\" width=\"$(size_px[1])px\" height=\"$(size_px[2])px\"/>",
         )
     )
 end
