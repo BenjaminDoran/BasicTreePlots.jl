@@ -32,7 +32,7 @@ tp = treeplot!(tree, branchwidth = 3, colormap = :vik, visible = true)
 treelabels!(tp; nodelabels, labeloffset = (0, 10))
 treecladelabel!(
     tp;
-    nodelabels = [(:a, :b) => "clade 1", ((:d, :e), "clade 2")],
+    cladelabels = [(:a, :b) => "clade 1", ((:d, :e), "clade 2")],
     lineoffset = (1.7, 1.5),
 )
 treecladelabel!(tp; lineoffset = 2.5, color = :green, labeloffset = (-2.0, -2.0))

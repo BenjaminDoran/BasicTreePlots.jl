@@ -216,7 +216,7 @@ fig
 
 - Colormap and color-range related options are mixed in from Makie (`colorscale`, `colormap`, etc.) and behave the same as other `Makie` plot types.
 
-## Documentation of attributes
+## Reference
 
 ```@docs; canonical=false
 treeplot

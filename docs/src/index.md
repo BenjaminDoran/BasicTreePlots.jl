@@ -33,7 +33,7 @@ Pkg.add("https://github.com/BenjaminDoran/BasicTreePlots.jl.git")
 
 ## Basic usage
 
-```{julia}
+```@figure
 using CairoMakie, BasicTreePlots
 tree = ((:a, :b), (:c, :d))
 treeplot(tree)

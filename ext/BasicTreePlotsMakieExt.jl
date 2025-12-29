@@ -544,14 +544,14 @@ treecladelabel(nodepoints::OrderedDict(node=>point); nodelabels=[node1 => "Node 
 ```
 tree = ((:a, :b), (:c, (:d, :e)))
 fig, ax, tp = treeplot(tree)
-treecladelabel!(tp.nodepoints; nodelabels=[(:a, :b) => "Node 1", tree[2] => "Node 2"])
+treecladelabel!(tp; cladelabels=[(:a, :b) => "Node 1", tree[2] => "Node 2"])
 fig
 ```
 
 """
 @recipe TreeCladeLabel (nodepoints,) begin
     """
-    List of nodes and associated labels for which to draw surrounding regions. Should be an iterable where
+    List of nodes and associated labels for which to draw a clade label. Should be an iterable where
     each element is a pair `node => label`. Basically `[(node, label) for (node, label) in nodelabels]` should
     not error and provide each node and label you want plotted.
 
@@ -561,7 +561,7 @@ fig
     Nodes and their decendent nodes should have coordinates accessible via `nodepoints[node]`.
     These coordinates can be calculated with `tp = treeplot!(tree)` and accessed with `tp.nodepoints`.
     """
-    nodelabels = nothing
+    cladelabels = nothing
 
     # Line options
     """
@@ -600,7 +600,7 @@ treecladelabel(ax::Union{Makie.Block,Makie.GridPosition}, plt::TreePlot; kwargs.
 function Makie.plot!(plt::TreeCladeLabel)
     inputs = [
         :nodepoints,
-        :nodelabels,
+        :cladelabels,
         :lineoffset,
         :linepadding,
         :lineresolution,
@@ -611,22 +611,22 @@ function Makie.plot!(plt::TreeCladeLabel)
         plt.attributes,
         inputs,
         [:line_points, :label_position, :label_text, :rotation],
-    ) do nodepoints, nodelabels, lineoffset, linepadding, lineresolution, labelrotation, tf
+    ) do nodepoints, cladelabels, lineoffset, linepadding, lineresolution, labelrotation, tf
 
         ## Default to labeling whole tree
-        nodelabels = if isnothing(nodelabels)
+        cladelabels = if isnothing(cladelabels)
             root = first(last(nodepoints))
             [root => BasicTreePlots.label(root)]
         else
-            nodelabels
+            cladelabels
         end
 
-        ## repeat line offset if single number so that zip(nodelabels, lineoffset) works
-        lineoffset = lineoffset isa Real ? repeat([lineoffset], length(nodelabels)) : lineoffset
+        ## repeat line offset if single number so that zip(cladelabels, lineoffset) works
+        lineoffset = lineoffset isa Real ? repeat([lineoffset], length(cladelabels)) : lineoffset
 
         ## For each clade => cladelabel
         line_points, label_positions, labels, rotation =
-            map(zip(collect(nodelabels), lineoffset)) do ((node, label), loff)
+            map(zip(collect(cladelabels), lineoffset)) do ((node, label), loff)
                 ## Get bounding box coordinates
                 amin, amax = extrema(n -> first(nodepoints[n]), PreOrderDFS(node))
                 bmin, bmax = extrema(n -> last(nodepoints[n]), PreOrderDFS(node))
@@ -683,7 +683,7 @@ treehilight!(nodepoints::OrderedDict(node => coordinate); nodes = [node1, node2]
 ```
 tree = ((:a, :b), (:c, (:d, :e)))
 fig, ax, tp = treeplot(tree)
-treehilight!(tp.nodepoints; nodes=[tree[1], (:d, :e)])
+treehilight!(tp; nodes=[tree[1], (:d, :e)])
 fig
 ```
 """
@@ -727,7 +727,7 @@ fig
        - directly refer to a cycled attribute, e.g. `:color`
        - map a cycled attribute to a palette attribute, e.g. `:linecolor => :color`
        - map multiple cycled attributes to a palette attribute, e.g. `[:linecolor, :markercolor] => :color`
-       """
+    """
     cycle = [:color => :patchcolor]
 
     "Allows default shifting of clade areas to back of plot; input into `Makie.translate!(plt, 0, 0, plt.z_shift[])`"
