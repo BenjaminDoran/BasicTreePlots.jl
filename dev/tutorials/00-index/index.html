@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Getting started · BasicTreePlots.jl</title><meta name="title" content="Getting started · BasicTreePlots.jl"/><meta property="og:title" content="Getting started · BasicTreePlots.jl"/><meta property="twitter:title" content="Getting started · BasicTreePlots.jl"/><meta name="description" content="Documentation for BasicTreePlots.jl."/><meta property="og:description" content="Documentation for BasicTreePlots.jl."/><meta property="twitter:description" content="Documentation for BasicTreePlots.jl."/><meta property="og:url" content="https://BenjaminDoran.github.io/BasicTreePlots.jl/tutorials/00-index/"/><meta property="twitter:url" content="https://BenjaminDoran.github.io/BasicTreePlots.jl/tutorials/00-index/"/><link rel="canonical" href="https://BenjaminDoran.github.io/BasicTreePlots.jl/tutorials/00-index/"/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">BasicTreePlots.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><input class="collapse-toggle" id="menuitem-2" type="checkbox" checked/><label class="tocitem" for="menuitem-2"><span class="docs-label">Tutorials</span><i class="docs-chevron"></i></label><ul class="collapsed"><li class="is-active"><a class="tocitem" href>Getting started</a><ul class="internal"><li><a class="tocitem" href="#plot-the-tree"><span>plot the tree</span></a></li><li><a class="tocitem" href="#Labeling-tips"><span>Labeling tips</span></a></li><li><a class="tocitem" href="#Adjusting-branch-appearence"><span>Adjusting branch appearence</span></a></li><li><a class="tocitem" href="#Markers-for-each-node"><span>Markers for each node</span></a></li><li><a class="tocitem" href="#Other-adjustments-of-style"><span>Other adjustments of style</span></a></li></ul></li><li><a class="tocitem" href="../extending-for-new-treetypes/">Extending to custom types</a></li><li><a class="tocitem" href="../extending-recipes/">Extending recipes</a></li><li><a class="tocitem" href="../layoutstyle/">Layout and branch styles</a></li><li><a class="tocitem" href="../orientation_example/">Example showing orienting tree</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3" type="checkbox"/><label class="tocitem" for="menuitem-3"><span class="docs-label">Gallery</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../gallery/00-index/">Gallery</a></li><li><a class="tocitem" href="../../gallery/big_phylogeny/">Larger phylogeny</a></li><li><a class="tocitem" href="../../gallery/clade_annotations/">Annotating various clade groups</a></li><li><a class="tocitem" href="../../gallery/phylogeny-with-heatmap/">Phylogeny with matched data</a></li><li><a class="tocitem" href="../../gallery/phylogeny_of_organisms/">Phylogeny of some organisms</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4" type="checkbox"/><label class="tocitem" for="menuitem-4"><span class="docs-label">Reference</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../reference/00-index/">BasicTreePlots</a></li><li><a class="tocitem" href="../../reference/treecladelabel/">treecladelabel</a></li><li><a class="tocitem" href="../../reference/treehilight/">treehilight</a></li><li><a class="tocitem" href="../../reference/treelabels/">treelabels</a></li><li><a class="tocitem" href="../../reference/treeplot/">treeplot</a></li><li><a class="tocitem" href="../../reference/treescatter/">treescatter</a></li></ul></li><li><a class="tocitem" href="../../90-contributing/">Contributing guidelines</a></li><li><a class="tocitem" href="../../91-developer/">Developer documentation</a></li><li><a class="tocitem" href="../../changelog/">Change Log</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Tutorials</a></li><li class="is-active"><a href>Getting started</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Getting started</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/BenjaminDoran/BasicTreePlots.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/BenjaminDoran/BasicTreePlots.jl/blob/main/docs/src/tutorials/00-index.md#" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Getting-started"><a class="docs-heading-anchor" href="#Getting-started">Getting started</a><a id="Getting-started-1"></a><a class="docs-heading-anchor-permalink" href="#Getting-started" title="Permalink"></a></h1><h2 id="plot-the-tree"><a class="docs-heading-anchor" href="#plot-the-tree">plot the tree</a><a id="plot-the-tree-1"></a><a class="docs-heading-anchor-permalink" href="#plot-the-tree" title="Permalink"></a></h2><pre><code class="language-julia hljs">using CairoMakie, BasicTreePlots
+tree = ((:a, :b), (:c, (:d, :e)))
+treeplot(tree)</code></pre><img src="./541b412.png" width="600px" height="450px"/><p>Because most nested collections in julia have <code>AbstractTrees.children</code> defined they can be plotted with <code>treeplot</code>.</p><p>We might want to just look at the tree rather than the axis</p><pre><code class="language-julia hljs">fig = Figure()
+ax = Axis(fig[1, 1])
+hidedecorations!(ax)
+hidespines!(ax)
+treeplot!(tree)
+fig</code></pre><img src="./f2b65c6.png" width="600px" height="450px"/><p>Rather than the square branches we can use straight branches</p><pre><code class="language-julia hljs">fig = Figure()
+ax = Axis(fig[1, 1])
+hidedecorations!(ax)
+hidespines!(ax)
+treeplot!(tree; branchstyle = :straight)
+fig</code></pre><img src="./f2cf19c.png" width="600px" height="450px"/><p>We can plot onto a Polar axis for a circular layout</p><pre><code class="language-julia hljs">fig = Figure()
+ax = PolarAxis(fig[1, 1])
+hidedecorations!(ax)
+hidespines!(ax)
+treeplot!(tree)
+fig</code></pre><img src="./9bc8bc0.png" width="600px" height="450px"/><h2 id="Labeling-tips"><a class="docs-heading-anchor" href="#Labeling-tips">Labeling tips</a><a id="Labeling-tips-1"></a><a class="docs-heading-anchor-permalink" href="#Labeling-tips" title="Permalink"></a></h2><p>We can add tip labels</p><pre><code class="language-julia hljs">fig = Figure()
+ax = PolarAxis(fig[1, 1], rautolimitmargin = (0.0, 0.1))
+hidedecorations!(ax)
+hidespines!(ax)
+tp = treeplot!(tree)
+treelabels!(tp)
+fig</code></pre><img src="./42059c0.png" width="600px" height="450px"/><p>We can increase the tip label fontsize.</p><pre><code class="language-julia hljs">fig = Figure()
+ax = PolarAxis(fig[1, 1], rautolimitmargin = (0.0, 0.2))
+hidedecorations!(ax)
+hidespines!(ax)
+tp = treeplot!(tree)
+treelabels!(tp; fontsize = 40)
+fig</code></pre><img src="./c0913c5.png" width="600px" height="450px"/><h2 id="Adjusting-branch-appearence"><a class="docs-heading-anchor" href="#Adjusting-branch-appearence">Adjusting branch appearence</a><a id="Adjusting-branch-appearence-1"></a><a class="docs-heading-anchor-permalink" href="#Adjusting-branch-appearence" title="Permalink"></a></h2><p>We can change the color of the branches</p><pre><code class="language-julia hljs">fig = Figure()
+ax = PolarAxis(fig[1, 1], rautolimitmargin = (0.0, 0.1))
+hidedecorations!(ax)
+hidespines!(ax)
+tp = treeplot!(tree; branchcolor = :orange)
+treelabels!(tp; fontsize = 20)
+fig</code></pre><img src="./14a149c.png" width="600px" height="450px"/><p>We can change the line color based on info in the tree</p><pre><code class="language-julia hljs">branchcolors = map(PreOrderDFS(tree)) do node
+    hash(node)
+end
+
+fig = Figure()
+ax = PolarAxis(fig[1, 1], rautolimitmargin = (0.0, 0.1))
+hidedecorations!(ax)
+hidespines!(ax)
+tp = treeplot!(tree; branchcolor = branchcolors)
+treelabels!(tp; fontsize = 20)
+fig</code></pre><img src="./ca22d13.png" width="600px" height="450px"/><p>For instance if we have external data about each node in the tree</p><pre><code class="language-julia hljs">tree_data =
+    Dict(node =&gt; (; support = rand(), favorite_number = rand(1:5)) for node in PreOrderDFS(tree))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Dict{Any, @NamedTuple{support::Float64, favorite_number::Int64}} with 9 entries:
+  :a                         =&gt; (support = 0.865167, favorite_number = 5)
+  :b                         =&gt; (support = 0.221731, favorite_number = 4)
+  (:a, :b)                   =&gt; (support = 0.287862, favorite_number = 3)
+  (:c, (:d, :e))             =&gt; (support = 0.531709, favorite_number = 1)
+  :d                         =&gt; (support = 0.851093, favorite_number = 5)
+  :e                         =&gt; (support = 0.308426, favorite_number = 3)
+  :c                         =&gt; (support = 0.121799, favorite_number = 1)
+  (:d, :e)                   =&gt; (support = 0.398234, favorite_number = 5)
+  ((:a, :b), (:c, (:d, :e))) =&gt; (support = 0.525113, favorite_number = 5)</code></pre><p>then we can plot support as the color and the favorite number as the line width.</p><pre><code class="language-julia hljs">branchcolors = map(PreOrderDFS(tree)) do node
+    tree_data[node].support
+end
+
+branchwidths = map(PreOrderDFS(tree)) do node
+    tree_data[node].favorite_number
+end
+
+fig = Figure()
+ax = PolarAxis(fig[1, 1], rautolimitmargin = (0.0, 0.1))
+hidedecorations!(ax)
+hidespines!(ax)
+
+p = treeplot!(tree; branchcolor = branchcolors, branchwidth = branchwidths)
+treelabels!(tp; fontsize = 20)
+Colorbar(fig[1, 2][3, 1], p)
+fig</code></pre><img src="./b49aed1.png" width="600px" height="450px"/><h2 id="Markers-for-each-node"><a class="docs-heading-anchor" href="#Markers-for-each-node">Markers for each node</a><a id="Markers-for-each-node-1"></a><a class="docs-heading-anchor-permalink" href="#Markers-for-each-node" title="Permalink"></a></h2><p>We can employ markers in the nodes to showcase the tree&#39;s information</p><pre><code class="language-julia hljs">fig = Figure()
+ax = PolarAxis(fig[1, 1], rautolimitmargin = (0.0, 0.2))
+hidedecorations!(ax)
+hidespines!(ax)
+tp=treeplot!(tree;)
+treelabels!(tp; fontsize = 20, labeloffset = (0.0, 10))
+treescatter!(tp; color = branchcolors, markersize = 15)
+fig</code></pre><img src="./2b0358d.png" width="600px" height="450px"/><p><code>treescatter(tp)</code> is equivalent to <code>scatter(tp.orderedpoints)</code> so all the keyword arguments for <code>scatter</code> should work. The points are ordered according to the result of <code>PreOrderDFS(tree)</code>, attributes can be assocated by matching that order.</p><h2 id="Other-adjustments-of-style"><a class="docs-heading-anchor" href="#Other-adjustments-of-style">Other adjustments of style</a><a id="Other-adjustments-of-style-1"></a><a class="docs-heading-anchor-permalink" href="#Other-adjustments-of-style" title="Permalink"></a></h2><p>For a PolarAxis, We can also control the span across which the tree is plotted. with the <code>openangle</code> parameter</p><pre><code class="language-julia hljs">fig = Figure()
+ax = PolarAxis(fig[1, 1], rautolimitmargin = (0.0, 0.1))
+hidedecorations!(ax)
+hidespines!(ax)
+p = treeplot!(
+    tree;
+    branchcolor = branchcolors,
+    branchwidth = branchwidths,
+    openangle = deg2rad(140),
+)
+Colorbar(fig[1, 2][3, 1], p)
+fig</code></pre><img src="./37bda18.png" width="600px" height="450px"/></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../">« Home</a><a class="docs-footer-nextpage" href="../extending-for-new-treetypes/">Extending to custom types »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Monday 29 December 2025 08:33">Monday 29 December 2025</span>. Using Julia version 1.12.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

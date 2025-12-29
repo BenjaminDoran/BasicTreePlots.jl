@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>treelabels · BasicTreePlots.jl</title><meta name="title" content="treelabels · BasicTreePlots.jl"/><meta property="og:title" content="treelabels · BasicTreePlots.jl"/><meta property="twitter:title" content="treelabels · BasicTreePlots.jl"/><meta name="description" content="Documentation for BasicTreePlots.jl."/><meta property="og:description" content="Documentation for BasicTreePlots.jl."/><meta property="twitter:description" content="Documentation for BasicTreePlots.jl."/><meta property="og:url" content="https://BenjaminDoran.github.io/BasicTreePlots.jl/reference/treelabels/"/><meta property="twitter:url" content="https://BenjaminDoran.github.io/BasicTreePlots.jl/reference/treelabels/"/><link rel="canonical" href="https://BenjaminDoran.github.io/BasicTreePlots.jl/reference/treelabels/"/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">BasicTreePlots.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><input class="collapse-toggle" id="menuitem-2" type="checkbox"/><label class="tocitem" for="menuitem-2"><span class="docs-label">Tutorials</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../tutorials/00-index/">Getting started</a></li><li><a class="tocitem" href="../../tutorials/extending-for-new-treetypes/">Extending to custom types</a></li><li><a class="tocitem" href="../../tutorials/extending-recipes/">Extending recipes</a></li><li><a class="tocitem" href="../../tutorials/layoutstyle/">Layout and branch styles</a></li><li><a class="tocitem" href="../../tutorials/orientation_example/">Example showing orienting tree</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3" type="checkbox"/><label class="tocitem" for="menuitem-3"><span class="docs-label">Gallery</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../gallery/00-index/">Gallery</a></li><li><a class="tocitem" href="../../gallery/big_phylogeny/">Larger phylogeny</a></li><li><a class="tocitem" href="../../gallery/clade_annotations/">Annotating various clade groups</a></li><li><a class="tocitem" href="../../gallery/phylogeny-with-heatmap/">Phylogeny with matched data</a></li><li><a class="tocitem" href="../../gallery/phylogeny_of_organisms/">Phylogeny of some organisms</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4" type="checkbox" checked/><label class="tocitem" for="menuitem-4"><span class="docs-label">Reference</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../00-index/">BasicTreePlots</a></li><li><a class="tocitem" href="../treecladelabel/">treecladelabel</a></li><li><a class="tocitem" href="../treehilight/">treehilight</a></li><li class="is-active"><a class="tocitem" href>treelabels</a><ul class="internal"><li><a class="tocitem" href="#Nodelabels"><span>Nodelabels</span></a></li><li><a class="tocitem" href="#Depth"><span>Depth</span></a></li><li><a class="tocitem" href="#Label-rotation"><span>Label rotation</span></a></li><li><a class="tocitem" href="#Label-alignment"><span>Label alignment</span></a></li><li><a class="tocitem" href="#Label-offset"><span>Label offset</span></a></li><li><a class="tocitem" href="#Label-guideline-styling"><span>Label guideline styling</span></a></li><li><a class="tocitem" href="#Reference"><span>Reference</span></a></li></ul></li><li><a class="tocitem" href="../treeplot/">treeplot</a></li><li><a class="tocitem" href="../treescatter/">treescatter</a></li></ul></li><li><a class="tocitem" href="../../90-contributing/">Contributing guidelines</a></li><li><a class="tocitem" href="../../91-developer/">Developer documentation</a></li><li><a class="tocitem" href="../../changelog/">Change Log</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Reference</a></li><li class="is-active"><a href>treelabels</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>treelabels</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/BenjaminDoran/BasicTreePlots.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/BenjaminDoran/BasicTreePlots.jl/blob/main/docs/src/reference/treelabels.md#" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="treelabels"><a class="docs-heading-anchor" href="#treelabels">treelabels</a><a id="treelabels-1"></a><a class="docs-heading-anchor-permalink" href="#treelabels" title="Permalink"></a></h1><p>Use <code>treelabels!</code> to annotate nodes with labels</p><pre><code class="language-julia hljs">tree = ((:a, :b), (:c, (:d, :e)))
+fig, ax, tp = treeplot(tree)
+treelabels!(tp)
+fig</code></pre><img src="./e594722.png" width="600px" height="450px"/><p>By default it will use <code>BasicTreePlots.tipannotations(tp.nodepoints)</code> and plot <code>BasicTreePlots.label(leaf)</code> for each leaf.</p><h2 id="Nodelabels"><a class="docs-heading-anchor" href="#Nodelabels">Nodelabels</a><a id="Nodelabels-1"></a><a class="docs-heading-anchor-permalink" href="#Nodelabels" title="Permalink"></a></h2><p>List of nodes and associated labels for which to plot. Should be an iterable where each element is a pair or tuple of <code>node =&gt; label</code>. Basically <code>[(node, label) for (node, label) in nodelabels]</code> should not error and provide each node and label you want plotted.</p><pre><code class="language-julia hljs">tree = ((:a, :b), (:c, (:d, :e)))
+fig, ax, tp = treeplot(tree)
+treelabels!(tp; nodelabels = [
+    tree[1] =&gt; &quot;A and B&quot;,
+    (:c, (:d, :e)) =&gt; &quot;C, D, E&quot;,
+    :a =&gt; &quot;A&quot;,
+    :c =&gt; &quot;C&quot;,
+    :d =&gt; &quot;D&quot;,
+])
+fig</code></pre><img src="./a8e7cb0.png" width="600px" height="450px"/><p>Nodes not provided will not have annotations added.</p><h2 id="Depth"><a class="docs-heading-anchor" href="#Depth">Depth</a><a id="Depth-1"></a><a class="docs-heading-anchor-permalink" href="#Depth" title="Permalink"></a></h2><p>Available options:</p><ul><li><code>nothing</code> (default) in which case the anchorpoints for the labels are directly on the nodes being labeled.</li><li><code>depth=:align</code>, Places the anchorpoints at a constant depth equal to the leaf node maximally distant from the root.</li><li><code>depth=&lt;:Real</code>, sets the custom constant depth at which the label anchorpoints are set.</li><li><code>depth=(node,pos)-&gt;Point2f</code>, Determines a custom function that takes a node and its coordinate and returns   where the label anchorpoint should be.</li></ul><pre><code class="language-julia hljs">tree = ((:a, :b), (:c, (:d, :e)))
+nodelabels = [tree[1] =&gt; &quot;A and B&quot;, (:c, (:d, :e)) =&gt; &quot;C, D, E&quot;, :a =&gt; &quot;A&quot;, :c =&gt; &quot;C&quot;, :d =&gt; &quot;D&quot;]
+fig = Figure(size=(900, 300))
+
+ax, tp = treeplot(fig[1,1], tree, axis=(; xautolimitmargin=(0.05, 0.4)))
+hidedecorations!(ax)
+treelabels!(tp; nodelabels, depth=:align)
+
+ax, tp = treeplot(fig[1,2], tree, axis=(; xautolimitmargin=(0.05, 0.4)))
+hidedecorations!(ax)
+treelabels!(tp; nodelabels, depth=tp.maxtreedepth)
+
+ax, tp = treeplot(fig[1,3], tree, axis=(; xautolimitmargin=(0.05, 0.2)))
+hidedecorations!(ax)
+treelabels!(tp; nodelabels, depth=(node, pos) -&gt; let
+    BasicTreePlots.isleaf(node) ? Point2f(tp.maxtreedepth[], pos[2]) : pos
+end)
+
+fig</code></pre><img src="./abd74c7.png" width="900px" height="300px"/><h2 id="Label-rotation"><a class="docs-heading-anchor" href="#Label-rotation">Label rotation</a><a id="Label-rotation-1"></a><a class="docs-heading-anchor-permalink" href="#Label-rotation" title="Permalink"></a></h2><p>Options are <code>:horizontal</code>, <code>:radial</code>, <code>:aligned</code>, or a number <code>θ&lt;:Real</code> in radians. If <code>automatic</code>, will default to <code>:aligned</code> on polar axis and <code>:horizontal</code> otherwise.</p><p>Rotation examples on <code>Axis</code> plot</p><pre><code class="language-julia hljs">tree = ((:a, :b), (:c, (:d, :e)))
+nodelabels = [tree[1] =&gt; &quot;A and B&quot;, (:c, (:d, :e)) =&gt; &quot;C, D, E&quot;, :a =&gt; &quot;A&quot;, :c =&gt; &quot;C&quot;, :d =&gt; &quot;D&quot;]
+fig = Figure(size=(600, 300))
+
+ax, tp = treeplot(fig[1,1], tree, axis=(;
+    title=&quot;labelrotation = :horizontal&quot;,
+    xautolimitmargin=(0.05, 0.4))
+)
+treelabels!(tp; nodelabels, labelrotation = :horizontal)
+
+ax, tp = treeplot(fig[1,2], tree, axis=(;
+        title=&quot;labelrotation = deg2rad(45)&quot;,
+    xautolimitmargin=(0.05, 0.4))
+)
+treelabels!(tp; nodelabels, labelrotation = deg2rad(45))
+
+fig</code></pre><img src="./5ca445e.png" width="600px" height="300px"/><p>Rotation examples on <code>PolarAxis</code> plot</p><pre><code class="language-julia hljs">tree = ((:a, :b), (:c, (:d, :e)))
+nodelabels = [
+    tree[1] =&gt; &quot;A and B&quot;, (:c, (:d, :e)) =&gt; &quot;C, D, E&quot;,
+    :a =&gt; &quot;A&quot;, :b =&gt; &quot;B&quot;, :c =&gt; &quot;C&quot;, :d =&gt; &quot;D&quot;, :e =&gt; &quot;E&quot;
+]
+
+fig = Figure(size=(600, 300))
+
+ax, tp = treeplot(fig[1,1], tree, axis=(;
+    type=PolarAxis,
+    title=&quot;labelrotation = :aligned&quot;,
+    rautolimitmargin=(0.0, 0.4))
+)
+hidedecorations!(ax)
+treelabels!(tp; nodelabels, labelrotation = :aligned)
+
+ax, tp = treeplot(fig[1,2], tree, axis=(;
+    type=PolarAxis,
+    title=&quot;labelrotation = :radial&quot;,
+    rautolimitmargin=(0.0, 0.4))
+)
+hidedecorations!(ax)
+treelabels!(tp; nodelabels, labelrotation = :radial)
+
+fig</code></pre><img src="./a363c2b.png" width="600px" height="300px"/><h2 id="Label-alignment"><a class="docs-heading-anchor" href="#Label-alignment">Label alignment</a><a id="Label-alignment-1"></a><a class="docs-heading-anchor-permalink" href="#Label-alignment" title="Permalink"></a></h2><p>determines where on the textbox is anchored to the anchorpoint, useful when plotting the tree in different orientations</p><pre><code class="language-julia hljs">fig = Figure(size=(400, 400))
+
+ax, tp = treeplot(fig[1,1], tree,
+    orientation=:bottom,
+    axis=(;
+        yautolimitmargin=(0.2, 0.05)
+    )
+)
+treelabels!(tp; nodelabels,
+    labelrotation = deg2rad(45),
+    labelalign=(:right, :center),
+    labeloffset=(0.0, -10),
+)
+fig</code></pre><img src="./720ca08.png" width="400px" height="400px"/><h2 id="Label-offset"><a class="docs-heading-anchor" href="#Label-offset">Label offset</a><a id="Label-offset-1"></a><a class="docs-heading-anchor-permalink" href="#Label-offset" title="Permalink"></a></h2><p>Offset in pixel space to push text label anchor points. Available options:</p><ul><li><p><code>automatic</code> (default) if plotting on <code>Axis()</code> the offset is (5px, 0), if on <code>PolarAxis()</code> the default is   <code>5px * (cos(θ), sin(θ))</code> where θ is the radian angle of the node.</p></li><li><p><code>labeloffset::Real</code> defaults to offsetting the label in pixels toward the x direction for <code>Axis</code><code>and in radius for</code>PolarAxis`</p></li><li><p><code>labeloffset=Tuple{&lt;:Real, &lt;:Real}</code>, if plotting on an <code>Axis</code> provide <code>(x,y)</code>, if on <code>PolarAxis</code> provide <code>(θ, r)</code>   in pixel units for the offset relative to the label anchorpoint.</p></li><li><p><code>labeloffset::Function=(node,pos)-&gt;(x_px, y_px)</code>, Provide a custom function that takes a node and its coordinate   in dataspace and return a pixel space offset. Note that pixel space does not get converted like the <code>PolarAxis</code>,   so conversion of coordinates may be required <code>r_off * (cos(θ+θ_off), sin(θ+θ_off))</code>.</p></li></ul><pre><code class="language-julia hljs">fig = Figure(size=(900,600))
+
+ax, tp = treeplot(fig[1,1], tree; axis=(;
+    xautolimitmargin=(0.05, 0.15),
+    title=&quot;labeloffset=automatic&quot;
+    )
+)
+hidedecorations!(ax)
+treelabels!(tp; nodelabels)
+
+ax, tp = treeplot(fig[2,1], tree;
+    axis=(;
+        type=PolarAxis,
+        rautolimitmargin=(0.0, 0.3),
+        title=&quot;labeloffset=automatic&quot;
+    )
+)
+hidedecorations!(ax)
+treelabels!(tp; nodelabels)
+
+ax, tp = treeplot(fig[1,2], tree; axis=(;
+    xautolimitmargin=(0.05, 0.15),
+    title=&quot;labeloffset=(20, 0)&quot;
+    )
+)
+hidedecorations!(ax)
+treelabels!(tp; nodelabels, labeloffset=(20, 0))
+
+ax, tp = treeplot(fig[2,2], tree;
+    axis=(;
+        type=PolarAxis,
+        rautolimitmargin=(0.0, 0.4),
+        title=&quot;labeloffset=(0, 20)&quot;
+    )
+)
+hidedecorations!(ax)
+treelabels!(tp; nodelabels, labeloffset=(0, 20))
+
+ax, tp = treeplot(fig[1,3], tree; axis=(;
+    xautolimitmargin=(0.05, 0.15),
+    title=&quot;labeloffset=function&quot;
+    )
+)
+hidedecorations!(ax)
+treelabels!(tp; nodelabels, labeloffset=(node, pos)-&gt;let
+    BasicTreePlots.isleaf(node) ? (20, 0) : (-55, 10)
+end)
+
+ax, tp = treeplot(fig[2,3], tree;
+    axis=(;
+        type=PolarAxis,
+        rautolimitmargin=(0.0, 0.3),
+        title=&quot;labeloffset=function&quot;
+    )
+)
+hidedecorations!(ax)
+treelabels!(tp; nodelabels, labeloffset=(node,pos)-&gt; let
+    BasicTreePlots.isleaf(node) ? 5 .* (cos(pos[1]), sin(pos[1])) : 25 .* (cos(pos[1])+deg2rad(-10), sin(pos[1]+deg2rad(-10)))
+end)
+
+fig</code></pre><img src="./6a00fd9.png" width="900px" height="600px"/><h2 id="Label-guideline-styling"><a class="docs-heading-anchor" href="#Label-guideline-styling">Label guideline styling</a><a id="Label-guideline-styling-1"></a><a class="docs-heading-anchor-permalink" href="#Label-guideline-styling" title="Permalink"></a></h2><p>If <code>guidesvisible=true</code> (default) draw guide lines from node to label anchorpoint. Useful for visually connecting leaves to their location on the y axis (or θ axis if plotted on <code>PolarAxis</code>), especially when using the <code>depth</code> attribute.</p><pre><code class="language-julia hljs">fig = Figure(size=(600, 300))
+
+ax, tp = treeplot(fig[1,1], tree; axis=(;title=&quot;No guides&quot;, xautolimitmargin=(0.05, 0.2)))
+hidedecorations!(ax)
+treelabels!(tp; depth=:align, guidesvisible=false)
+
+ax, tp = treeplot(fig[1,2], tree; axis=(;title=&quot;Styled guides&quot;, xautolimitmargin=(0.05, 0.2)))
+hidedecorations!(ax)
+treelabels!(tp; depth=:align, guideswidth=3, guidescolor=:magenta, guidesstyle=:dash)
+
+fig</code></pre><img src="./c1630f3.png" width="600px" height="300px"/><h2 id="Reference"><a class="docs-heading-anchor" href="#Reference">Reference</a><a id="Reference-1"></a><a class="docs-heading-anchor-permalink" href="#Reference" title="Permalink"></a></h2><article><details class="docstring" open="true"><summary id="BasicTreePlots.treelabels-reference-treelabels"><a class="docstring-binding" href="#BasicTreePlots.treelabels-reference-treelabels"><code>BasicTreePlots.treelabels</code></a> — <span class="docstring-category">Function</span></summary><section><div><p>Adds text labels associated to particular nodes in a tree already plotted with <code>treeplot</code></p><p><strong>Examples</strong></p><p>Defaults to labeling the leaves of the tree based on <code>BasicTreePlots.label(leafnode)</code></p><pre><code class="language-julia hljs">ax, p = treeplot(tree)
+treelabels!(p.nodepoints)</code></pre><p>Also possible to specify a subset of nodes with custom labels</p><pre><code class="language-julia hljs">ax, p = treeplot(tree)
+treelabels!(p.nodepoints; nodelabels=Dict(node1 =&gt; &quot;Node 1&quot;, node_a =&gt; &quot;My special node&quot;))</code></pre><p><strong>Plot type</strong></p><p>The plot type alias for the <code>treelabels</code> function is <code>TreeLabels</code>.</p><p><strong>Attributes</strong></p><p><strong><code>clip_planes</code></strong> =  <code>@inherit clip_planes automatic</code>  — Clip planes offer a way to do clipping in 3D space. You can set a Vector of up to 8 <code>Plane3f</code> planes here, behind which plots will be clipped (i.e. become invisible). By default clip planes are inherited from the parent plot or scene. You can remove parent <code>clip_planes</code> by passing <code>Plane3f[]</code>.</p><p><strong><code>depth</code></strong> =  <code>nothing</code>  — Available options: <code>nothing</code> (default) in which case the anchorpoints for the labels are directly on the nodes being labeled. <code>depth=:align</code>, Places the anchorpoints at a constant depth equal to the leaf node maximally distant from the root. <code>depth=&lt;:Real</code>, sets the custom constant depth at which the label anchorpoints are set. <code>depth=(node,pos)-&gt;Point2f</code>, Determines a custom function that takes a node and its coordinate and returns where the label anchorpoint should be.</p><p><strong><code>depth_shift</code></strong> =  <code>0.0</code>  — Adjusts the depth value of a plot after all other transformations, i.e. in clip space, where <code>-1 &lt;= depth &lt;= 1</code>. This only applies to GLMakie and WGLMakie and can be used to adjust render order (like a tunable overdraw).</p><p><strong><code>font</code></strong> =  <code>@inherit font :regular</code>  — Font of the text labels</p><p><strong><code>fontsize</code></strong> =  <code>@inherit fontsize 9.0f0</code>  — Font size of the node labels</p><p><strong><code>fxaa</code></strong> =  <code>true</code>  — Adjusts whether the plot is rendered with fxaa (fast approximate anti-aliasing, GLMakie only). Note that some plots implement a better native anti-aliasing solution (scatter, text, lines). For them <code>fxaa = true</code> generally lowers quality. Plots that show smoothly interpolated data (e.g. image, surface) may also degrade in quality as <code>fxaa = true</code> can cause blurring.</p><p><strong><code>guidescolor</code></strong> =  <code>:lightgray</code>  — Line color of the guide lines</p><p><strong><code>guidesstyle</code></strong> =  <code>:solid</code>  — Line style of the guide lines</p><p><strong><code>guidesvisible</code></strong> =  <code>true</code>  — If <code>true</code> draw guide lines from node to label anchorpoint. Useful for visually connecting leaves to their location on the y axis (or θ axis if plotted on <code>PolarAxis</code>), especially when using the <code>depth</code> attribute.</p><p><strong><code>guideswidth</code></strong> =  <code>0.5</code>  — Line width of the guide lines</p><p><strong><code>inspectable</code></strong> =  <code>@inherit inspectable</code>  — Sets whether this plot should be seen by <code>DataInspector</code>. The default depends on the theme of the parent scene.</p><p><strong><code>inspector_clear</code></strong> =  <code>automatic</code>  — Sets a callback function <code>(inspector, plot) -&gt; ...</code> for cleaning up custom indicators in DataInspector.</p><p><strong><code>inspector_hover</code></strong> =  <code>automatic</code>  — Sets a callback function <code>(inspector, plot, index) -&gt; ...</code> which replaces the default <code>show_data</code> methods.</p><p><strong><code>inspector_label</code></strong> =  <code>automatic</code>  — Sets a callback function <code>(plot, index, position) -&gt; string</code> which replaces the default label generated by DataInspector.</p><p><strong><code>labelalign</code></strong> =  <code>automatic</code>  — Text alignment of labels to anchor points, Is overridden when labelrotation=:aligned (default).</p><p><strong><code>labeloffset</code></strong> =  <code>automatic</code>  — Offset in pixel space to push text label anchor points. Available options: <code>automatic</code> (default) if plotting on <code>Axis()</code> the offset is (5px, 0), if on <code>PolarAxis()</code> the default is <code>5px * (cos(θ), sin(θ))</code> where θ is the radian angle of the node. <code>labeloffset::Real</code> defaults to offsetting the label in pixels toward the x direction for <code>Axis</code><code>and in radius for</code>PolarAxis<code></code>labeloffset=Tuple{&lt;:Real, &lt;:Real}<code>, if plotting on an</code>Axis<code>provide</code>(x,y)<code>, if on</code>PolarAxis<code>provide</code>(θ, r)<code>in pixel units for the offset relative to the label anchorpoint.</code>labeloffset::Function=(node,pos)-&gt;(x px, y px)<code>, Provide a custom function that takes a node and its coordinate in dataspace and return a pixel space offset. Note that pixel space does not get converted like the</code>PolarAxis<code>, so conversion of coordinates may be required</code>r<em>off * (cos(θ+θ</em>off), sin(θ+θ_off))`.</p><p><strong><code>labelrotation</code></strong> =  <code>automatic</code>  — Options are <code>:horizontal</code>, <code>:radial</code>, <code>:aligned</code>, or a number <code>θ&lt;:Real</code> in radians. If <code>automatic</code>, will default to <code>:aligned</code> on polar axis and <code>:horizontal</code> otherwise.</p><p><strong><code>model</code></strong> =  <code>automatic</code>  — Sets a model matrix for the plot. This overrides adjustments made with <code>translate!</code>, <code>rotate!</code> and <code>scale!</code>.</p><p><strong><code>nodelabels</code></strong> =  <code>nothing</code>  — List of nodes and associated labels for which to plot. Should be an iterable where each element is a pair <code>node =&gt; label</code>. Basically <code>[(node, label) for (node, label) in nodelabels]</code> should not error and provide each node and label you want plotted.</p><p>If nothing will default to <code>BasicTreePlots.tipannotations(nodepoints)</code> and plot <code>BasicTreePlots.label(leaf)</code> for each leaf</p><p>Nodes should have coordinates accessible via <code>nodepoints[node]</code>. These coordinates can be calculated with <code>tp = treeplot!(tree)</code> and accessed with <code>tp.nodepoints</code>.</p><p><strong><code>overdraw</code></strong> =  <code>false</code>  — Controls if the plot will draw over other plots. This specifically means ignoring depth checks in GL backends</p><p><strong><code>space</code></strong> =  <code>:data</code>  — Sets the transformation space for box encompassing the plot. See <code>Makie.spaces()</code> for possible inputs.</p><p><strong><code>ssao</code></strong> =  <code>false</code>  — Adjusts whether the plot is rendered with ssao (screen space ambient occlusion). Note that this only makes sense in 3D plots and is only applicable with <code>fxaa = true</code>.</p><p><strong><code>transformation</code></strong> =  <code>:automatic</code>  — Controls the inheritance or directly sets the transformations of a plot. Transformations include the transform function and model matrix as generated by <code>translate!(...)</code>, <code>scale!(...)</code> and <code>rotate!(...)</code>. They can be set directly by passing a <code>Transformation()</code> object or inherited from the parent plot or scene. Inheritance options include:</p><ul><li><code>:automatic</code>: Inherit transformations if the parent and child <code>space</code> is compatible</li><li><code>:inherit</code>: Inherit transformations</li><li><code>:inherit_model</code>: Inherit only model transformations</li><li><code>:inherit_transform_func</code>: Inherit only the transform function</li><li><code>:nothing</code>: Inherit neither, fully disconnecting the child&#39;s transformations from the parent</li></ul><p>Another option is to pass arguments to the <code>transform!()</code> function which then get applied to the plot. For example <code>transformation = (:xz, 1.0)</code> which rotates the <code>xy</code> plane to the <code>xz</code> plane and translates by <code>1.0</code>. For this inheritance defaults to <code>:automatic</code> but can also be set through e.g. <code>(:nothing, (:xz, 1.0))</code>.</p><p><strong><code>transparency</code></strong> =  <code>false</code>  — Adjusts how the plot deals with transparency. In GLMakie <code>transparency = true</code> results in using Order Independent Transparency.</p><p><strong><code>visible</code></strong> =  <code>true</code>  — Controls whether the plot gets rendered or not.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/MakieOrg/Makie.jl/blob/v0.24.8/src/recipes.jl#L540-L665">source</a></section></details></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../treehilight/">« treehilight</a><a class="docs-footer-nextpage" href="../treeplot/">treeplot »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Monday 29 December 2025 08:33">Monday 29 December 2025</span>. Using Julia version 1.12.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
