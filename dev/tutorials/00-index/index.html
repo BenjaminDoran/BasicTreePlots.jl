@@ -46,15 +46,15 @@ tp = treeplot!(tree; branchcolor = branchcolors)
 treelabels!(tp; fontsize = 20)
 fig</code></pre><img src="./ca22d13.png" width="600px" height="450px"/><p>For instance if we have external data about each node in the tree</p><pre><code class="language-julia hljs">tree_data =
     Dict(node =&gt; (; support = rand(), favorite_number = rand(1:5)) for node in PreOrderDFS(tree))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Dict{Any, @NamedTuple{support::Float64, favorite_number::Int64}} with 9 entries:
-  :a                         =&gt; (support = 0.865167, favorite_number = 5)
-  :b                         =&gt; (support = 0.221731, favorite_number = 4)
-  (:a, :b)                   =&gt; (support = 0.287862, favorite_number = 3)
-  (:c, (:d, :e))             =&gt; (support = 0.531709, favorite_number = 1)
-  :d                         =&gt; (support = 0.851093, favorite_number = 5)
-  :e                         =&gt; (support = 0.308426, favorite_number = 3)
-  :c                         =&gt; (support = 0.121799, favorite_number = 1)
-  (:d, :e)                   =&gt; (support = 0.398234, favorite_number = 5)
-  ((:a, :b), (:c, (:d, :e))) =&gt; (support = 0.525113, favorite_number = 5)</code></pre><p>then we can plot support as the color and the favorite number as the line width.</p><pre><code class="language-julia hljs">branchcolors = map(PreOrderDFS(tree)) do node
+  :a                         =&gt; (support = 0.912975, favorite_number = 4)
+  :b                         =&gt; (support = 0.283597, favorite_number = 5)
+  (:a, :b)                   =&gt; (support = 0.39236, favorite_number = 3)
+  (:c, (:d, :e))             =&gt; (support = 0.792544, favorite_number = 5)
+  :d                         =&gt; (support = 0.95386, favorite_number = 4)
+  :e                         =&gt; (support = 0.64017, favorite_number = 1)
+  :c                         =&gt; (support = 0.640727, favorite_number = 2)
+  (:d, :e)                   =&gt; (support = 0.296057, favorite_number = 5)
+  ((:a, :b), (:c, (:d, :e))) =&gt; (support = 0.0618661, favorite_number = 4)</code></pre><p>then we can plot support as the color and the favorite number as the line width.</p><pre><code class="language-julia hljs">branchcolors = map(PreOrderDFS(tree)) do node
     tree_data[node].support
 end
 
