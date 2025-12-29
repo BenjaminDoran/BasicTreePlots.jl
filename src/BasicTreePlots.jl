@@ -1,72 +1,47 @@
 module BasicTreePlots
 
-using Reexport: Reexport
+using Reexport: Reexport, @reexport
 using Statistics: mean
-using AbstractTrees: nodevalue, children, PreOrderDFS
+using AbstractTrees: nodevalue, children
+@reexport using AbstractTrees: PreOrderDFS
+using OrderedCollections: OrderedDict
 # using Makie: Point2f
+
 
 const LAYOUTS = (:dendrogram, :cladogram, :radial)
 const BRANCHTYPES = (:square, :straight)
 
-export treeplot, treeplot!
+export treeplot,
+    treeplot!,
+    treescatter,
+    treescatter!,
+    treelabels,
+    treelabels!,
+    treecladelabel,
+    treecladelabel!,
+    treehilight,
+    treehilight!
 
-"""
-    treeplot(tree; kwargs...)
 
-# Args:
 
-- tree, the root node of a tree that has `AbstractTrees.children()` defined.
-    All nodes should be reachable by using `AbstractTrees.PreOrderDFS()` iterator.
-
-# Keyword arguments:
-
-- `showroot::Bool = false`, if `BasicTreePlots.distance()` is not `nan` for root, show line linking root to parent.
-
-- `layoutstyle::Symbol = :dendrogram` available options are `:dendrogram`, or `:cladogram`
-    -  `:dendrogram` displays tree taking into account the distance between parent and children nodes as calculated from `BasicTreePlots.distance(node)`.
-        If the distance is not defined, it defaults to `1` and is equivalent to the `:cladogram` layout
-    - `:cladogram` displays the tree where each distance from a child node to their parent is set to `1`.
-
-- `branchstyle::Symbol = :square` available options are `:square` or `:straight`
-    - `:square` will display line from child to parent as going back to the height of the parent,
-        before connecting back to the parent node at a right angle.
-    -  `straight` will display line from child to parent as a straight line from child to parent.
-
-- `linecolor = :black`, should match the `color` option in Makie's `lines` plot.
-    Can be either a single color `:black`, color plus alpha transperency `(:black, 0.5)`, or a vector of numbers for each node in pre-walk order.
-    color for each node is associated to the line connecting it to its parent.
-
-- `linewidth = 1`, should match the `linewidth` option in Makie's `lines` plot.
-    Can be either a single width or a vector of numbers for each node in pre-walk order.
-    width for each node is associated to the line connecting it to its parent.
-
-- `linecolormap=:viridis`  color map associated to `linecolor`. can be symbel of known colormap or gradient created from `cgrad()`.
-    see [Makie's color documentation](https://docs.makie.org/v0.21/explanations/colors)
-
-- `branch_point_resolution = 25`, number of points associated to each line segment.
-    Can be decreased to increase plotting speed.
-    Or, increased if lines that should be smooth are not.
-
-- `usemaxdepth = false`, if `true` draw guide lines from each leaf tip to the depth of the leaf that is maximally distant from root.
-    Useful for connecting leaves to there location on the y axis (or θ axis if plotted on `PolarAxis`).
-
-- `tipannotationsvisible::Bool = true`, whether to show text labels for each leaf tip.
-
-- `tipfontsize = 9.0f0`, font size that tip labels are displayed at.
-
-- `openangle = 0`, Angle in radians that limits span of tree around the circle when plotted on `PolarAxis`.
-    if `openangle = deg2rad(5)` then leaf tips will spread across angles `0` to `(2π - openangle)`.
-
-- `tipalign = (:left, :center)` text alignment of tip labels.
-    see [Makie options](https://docs.makie.org/v0.21/reference/plots/text#alignment)
-
-- `tipannotationoffset = (3.0f0, 0.0f0)` offset of tip label from actual tip position.
-    The first value is associated with the `x` axis, and the second is associated with the `y` axis.
-    (Currently, only available for cartisian axis)
-
-"""
+# Documentation for plotting functions are in extensions
 function treeplot end
 function treeplot! end
+
+function treescatter end
+function treescatter! end
+
+
+function treelabels end
+function treelabels! end
+
+
+function treecladelabel end
+function treecladelabel! end
+
+
+function treehilight end
+function treehilight! end
 
 # public distance, label
 
@@ -77,8 +52,8 @@ return scaler distance from node to parent of node. Defaults to `1`
 
 To extend `treeplot` to your type define method for `BasicTreePlots.distance(node::YourNodeType)`
 """
-distance() = 1
-distance(node) = 1
+distance() = 1.0f0
+distance(node) = 1.0f0
 
 """
     label(node)
@@ -92,12 +67,89 @@ To extend `treeplot` to your type define method for `BasicTreePlots.label(node::
 label(n) = string(nodevalue(n))
 
 isleaf(n) = (isempty ∘ children)(n)
+
 leafcount(t) = mapreduce(isleaf, +, PreOrderDFS(t))
 
-function nodepositions(tree; showroot = false, layoutstyle = :dendrogram)
-    nodedict = Dict{Any,Tuple{Float64,Float64}}()
-    currdepth = showroot ? distance(tree) : 0.0
-    leafcount = [-1]
+
+"""
+    ladderize!([fun::Function, agg::Function,] tree; rev=false)
+    ladderize([fun::Function, agg::Function,] tree; rev=false)
+
+Perform inplace sorting 'ladderization' of the children of each node in the provided tree
+based on user provided scaler functions `fun` and aggregating function `agg`. `ladderize`
+(without the exlamation point) performs a `deepcopy` of the tree before sorting the tree
+
+Calling `ladderize` with no funtion arguments is equivalent to calling `ladderize!(n->1, sum, t; rev)` which
+will sort the tree by the node's count of descendents.
+
+# Args:
+* `fun::Function`: function that takes leaves of the tree and outputs scaler value
+* `agg::Function`: aggregating function, takes collection of outputs from `fun` and returns scaler output
+* `tree`: tree object that fulfills `AbstractTrees` interface. `AbstractTrees.children(node)`
+    should provide sortable collection children of the node.
+* `rev::Bool=false`: whether to sort children of each node in acending (default) or desending order.
+
+# Examples
+
+```
+ladderize!(tree)
+```
+
+```
+tree = ladderize(tree)
+```
+
+```
+ladderize!(mean, tree) do leaf
+    leafdata_dict[name(leaf)]["fitness"]
+end
+```
+"""
+function ladderize(t; rev = false)
+    new_t = deepcopy(t)
+    ladderize!(new_t; rev)
+end
+function ladderize(fun, agg, t; rev = false)
+    new_t = deepcopy(t)
+    ladderize!(fun, agg, new_t; rev)
+end
+function ladderize!(t; rev = false)
+    ladderize!(n->1, sum, t; rev)
+end
+function ladderize!(fun::Function, agg::Function, t; rev = false)
+    function walk!(n)
+        if isleaf(n)
+            return fun(n)
+        else
+            node_children = children(n)
+            child_results = [walk!(c) for c in node_children]
+            node_children .= node_children[sortperm(child_results; rev)]
+            return agg(child_results)
+        end
+    end
+    walk!(t)
+    return t
+end
+
+
+
+function nodepositions(tree; kwargs...)
+    nodedict = OrderedDict{Any,Tuple{Float32,Float32}}()
+    nodepositions!(nodedict, tree; kwargs...)
+end
+function nodepositions(coordtype::Type, tree; kwargs...)
+    nodedict = OrderedDict{Any,coordtype}()
+    nodepositions!(nodedict, tree; kwargs...)
+end
+function nodepositions!(
+    nodedict,
+    tree;
+    showroot = false,
+    layoutstyle = :dendrogram,
+    nodeoffset = 0.0f0,
+)
+    currdepth = showroot ? distance(tree) : 0.0f0
+    leafcount = [0.0f0 + nodeoffset]
     if layoutstyle == :dendrogram
         coord_positions_dendrogram!(nodedict, tree, currdepth, leafcount)
     elseif layoutstyle == :cladogram
@@ -107,6 +159,7 @@ function nodepositions(tree; showroot = false, layoutstyle = :dendrogram)
     end
     return nodedict
 end
+
 
 function coord_positions_dendrogram!(nodedict, node, curr_depth, leafcount)
     if isleaf(node)
@@ -120,6 +173,7 @@ function coord_positions_dendrogram!(nodedict, node, curr_depth, leafcount)
     return nodedict[node] = (curr_depth, height)
 end
 
+
 function coord_positions_cladogram!(nodedict, node, curr_depth, leafcount)
     if isleaf(node)
         leafcount[begin] += 1
@@ -132,6 +186,7 @@ function coord_positions_cladogram!(nodedict, node, curr_depth, leafcount)
     return nodedict[node] = (curr_depth, height)
 end
 
+
 function extend_tips!(nodecoords)
     maxleafposition = argmax(x -> x[1], values(nodecoords))
     for (k, v) in nodecoords
@@ -141,8 +196,9 @@ function extend_tips!(nodecoords)
     end
 end
 
+
 function makesegments(nodedict, tree; resolution = 25, branchstyle = :square)
-    segs = Vector{Vector{Tuple{Float64,Float64}}}()
+    segs = Vector{Vector{Tuple{Float32,Float32}}}()
     if branchstyle == :square
         make_square_segments!(segs, nodedict, tree; resolution)
     elseif branchstyle == :straight
@@ -152,6 +208,7 @@ function makesegments(nodedict, tree; resolution = 25, branchstyle = :square)
     end
     return segs
 end
+
 
 function make_square_segments!(segs, nodedict, tree; resolution = 25)
     function segment_prewalk!(segs, node, parent_node)
@@ -212,19 +269,12 @@ function make_straight_segments!(segs, nodedict, tree)
     segs
 end
 
+
 function tipannotations(nodedict)
-    tipnames = String[]
-    tippositions = Tuple{Float32,Float32}[]
-    for (k, v) in nodedict
-        isleaf(k) || continue
-        push!(tipnames, (label(k)))
-        push!(tippositions, v)
-    end
-    tippositions, tipnames
+    res = [(k, v, label(k)) for (k, v) in nodedict if isleaf(k)]
+    first.(res), getindex.(res, 2), last.(res)
 end
 
-# include("./MakieRecipe.jl")
-# @reexport using .MakieRecipe: treeplot, treeplot!
-# using .MakieRecipe: theme_empty
+polaroffset(pos, off) = off[2] .* (cos(pos[1] + off[1]), sin(pos[1] + off[1]))
 
 end # module

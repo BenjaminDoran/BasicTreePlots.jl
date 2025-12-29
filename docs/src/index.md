@@ -13,7 +13,7 @@ i.e. has `AbstractTrees.children(YourType)` defined.
 Optionally, `BasicTreePlots.distance(YourType)` and `BasicTreePlots.label(YourType)` can be defined to allow plotting trees
 with variable distances between children and parent nodes and pretty printing of each node in the tree respectively.
 
-Currently, we only provide `Makie.jl` backends, but are interested in contributions for recipes for `Plots.jl` and `TidyPlots.jl`.
+Currently, we only provide `Makie.jl` backends, but are interested in contributions for recipes for `Plots.jl` and `TidierPlots.jl`.
 As well as any other backends or custom tree structures that don't work automatically.
 See the `ext` folder for example extensions.
 
@@ -33,21 +33,17 @@ Pkg.add("https://github.com/BenjaminDoran/BasicTreePlots.jl.git")
 
 ## Basic usage
 
-```{julia}
+```@figure
 using CairoMakie, BasicTreePlots
 tree = ((:a, :b), (:c, :d))
 treeplot(tree)
 ```
 
-see [Tutorials](tutorials/basics.md) and [Gallery](gallery/simple_phylogeny.md) for more in depth examples
+see [Tutorials](tutorials/00-index.md) and [Gallery](gallery/00-index.md) for more in depth examples
 
 ## `treeplot()` documentation
 
-see [reference](95-reference.md) for other function's documentation
-
-```@docs; canonical=false
-treeplot
-```
+see [reference](reference/00-index.md) for other function's documentation
 
 ## Contributors
 

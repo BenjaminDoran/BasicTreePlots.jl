@@ -24,7 +24,7 @@ LiveServer.servedocs(;
     # Extra source folder to watch for changes
     include_dirs = String[
     # Watch the src folder so docstrings can be Revise'd
-        joinpath(repo_root, "src"),],
+        joinpath(repo_root, "docs/src"),],
     skip_dirs = String[
         # Skip the folder where Literate.jl output is written. This is needed
         # to avoid infinite loops where running make.jl updates watched files,
@@ -35,7 +35,8 @@ LiveServer.servedocs(;
     include_files = String[
         joinpath(repo_root, "docs/generate.jl"),
         # Watch the index files in the skip_dirs folders
-        joinpath(repo_root, "docs/src/tutorials/index.md"),
+        joinpath(repo_root, "docs/src/tutorials/00-index.md"),
+        joinpath(repo_root, "docs/src/gallery/00-index.md"),
         joinpath(repo_root, "docs/changelog.jl"),
         joinpath(repo_root, "CHANGELOG.md"),
     ],

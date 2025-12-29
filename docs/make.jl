@@ -1,21 +1,23 @@
 # Make sure docs environment is active and instantiated
-import Pkg
+using Pkg: Pkg
 Pkg.activate(@__DIR__)
 Pkg.instantiate()
-
 cd(@__DIR__)
 
-using TimerOutputs
 using ArgMacros
-import LiveServer
+using TimerOutputs
+using LiveServer: LiveServer
 
 if "--liveserver" ∈ ARGS
     using Revise
     Revise.revise()
 end
 
-using Literate, BasicTreePlots
-using Documenter
+using CairoMakie, BasicTreePlots, Literate
+using Documenter: Documenter
+using Documenter.MarkdownAST
+using Documenter.MarkdownAST: @ast
+using Markdown
 
 dto = TimerOutput()
 reset_timer!(dto)
@@ -30,21 +32,15 @@ const GALLERY_IN = joinpath(@__DIR__, "src", "literate-gallery")
 const GALLERY_OUT = joinpath(@__DIR__, "src", "gallery")
 const changelogfile = joinpath(repo_root, "CHANGELOG.md")
 
-
-
-function parse_args(ARGS)
-    args = @tuplearguments begin
-        @argumentflag liveserver "--liveserver"
-        @argumentflag excludetutorials "--exclude-tutorials"
-        @argumentflag verbose "-v" "--verbose"
-    end
-    return args
-end
+include("helpers/helpers.jl")
+include("helpers/figure_block.jl")
+include("helpers/attrdocs_block.jl")
+include("helpers/shortdocs_block.jl")
 
 function main(ARGS)
     args = parse_args(ARGS)
 
-    DocMeta.setdocmeta!(
+    Documenter.DocMeta.setdocmeta!(
         BasicTreePlots,
         :DocTestSetup,
         :(using BasicTreePlots);
@@ -52,7 +48,7 @@ function main(ARGS)
     )
 
     # Generate change log
-    _create_documenter_changelog()
+    _create_documenter_changelog(@__DIR__)
 
     # Generate tutorials by default
     if !args.excludetutorials
@@ -88,8 +84,24 @@ function main(ARGS)
         startswith(file, r"^\d\d-") && last(splitext(file)) == ".md"
     ]
 
-    makedocs(;
-        modules = [BasicTreePlots],
+    reference_pages =
+        "Reference" => [
+            joinpath("reference", file) for
+            file in readdir(joinpath(@__DIR__, "src", "reference")) if last(splitext(file)) == ".md"
+        ]
+
+    pages = [
+        "Home" => "index.md",
+        (tutorials_in_menu ? [tutorials_menu] : [])...,
+        (tutorials_in_menu ? [gallery_menu] : [])...,
+        reference_pages,
+        numbered_pages...,
+        "Change Log" => "changelog.md",
+    ]
+
+    empty!(MakieDocsHelpers.FIGURES)
+    Documenter.makedocs(;
+        # modules = [BasicTreePlots],
         authors = "Benjamin Doran and collaborators",
         repo = "https://github.com/$ORG_NAME/$PACKAGE_NAME/blob/{commit}{path}#{line}",
         sitename = PACKAGE_NAME,
@@ -100,126 +112,16 @@ function main(ARGS)
             repolink = "https://github.com/$ORG_NAME/$PACKAGE_NAME",
             collapselevel = 1,
         ),
-        pages = [
-            "Home" => "index.md",
-            (tutorials_in_menu ? [tutorials_menu] : [])...,
-            (tutorials_in_menu ? [gallery_menu] : [])...,
-            numbered_pages...,
-            "Change Log" => "changelog.md",
-        ],
+        pages = pages,
+        expandfirst = unnest(
+            nested_filter(pages, r"src/(gallery|tutorials|reference)/(?!overview)"),
+        ),
+        pagesonly = true,
     )
 
     if !args.liveserver
-        deploydocs(; repo = "github.com/$ORG_NAME/$PACKAGE_NAME")
+        Documenter.deploydocs(; repo = "github.com/$ORG_NAME/$PACKAGE_NAME")
     end
-end
-
-
-function _generate_literate_docs(dir_in, dir_out, liveserver)
-    # Run Literate on all examples
-    for (IN, OUT) in [(dir_in, dir_out)]
-        for program in readdir(IN; join = true)
-            name = basename(program)
-            if endswith(program, ".jl")
-                if !liveserver
-                    script = @timeit dto "script()" @timeit dto name begin
-                        Literate.script(program, OUT)
-                    end
-                    code = strip(read(script, String))
-                else
-                    code = "<< no script output when building as draft >>"
-                end
-
-                # remove "hidden" lines which are not shown in the markdown
-                line_ending_symbol = occursin(code, "\r\n") ? "\r\n" : "\n"
-                code_clean = join(
-                    filter(x -> !endswith(x, "#hide"), split(code, r"\n|\r\n")),
-                    line_ending_symbol,
-                )
-                code_clean = replace(code_clean, r"^# This file was generated .*$"m => "")
-                code_clean = strip(code_clean)
-
-                mdpost(str) = replace(str, "@__CODE__" => code_clean)
-                function nbpre(str)
-                    # \llbracket and \rr bracket not supported by MathJax (Jupyter/nbviewer)
-                    str = replace(str, "\\llbracket" => "[\\![", "\\rrbracket" => "]\\!]")
-                    return str
-                end
-
-                @timeit dto "markdown()" @timeit dto name begin
-                    Literate.markdown(program, OUT, postprocess = mdpost)
-                end
-                if !liveserver
-                    @timeit dto "notebook()" @timeit dto name begin
-                        Literate.notebook(program, OUT, preprocess = nbpre, execute = is_ci) # Don't execute locally
-                    end
-                end
-            elseif any(endswith.(program, [".png", ".jpg", ".gif"]))
-                cp(program, joinpath(OUT, name); force = true)
-            else
-                @warn "ignoring $program"
-            end
-        end
-    end
-end
-
-function _create_documenter_changelog()
-    content = read(changelogfile, String)
-    # Replace release headers
-    content = replace(content, "## [Unreleased]" => "## Changes yet to be released")
-    content = replace(content, r"## \[(\d+\.\d+\.\d+)\]" => s"## Version \1")
-    # Replace [#XXX][github-XXX] with the proper links
-    content = replace(
-        content,
-        r"(\[#(\d+)\])\[github-\d+\]" =>
-            s"\1(https://github.com/BenjaminDoran/BasicTreePlots.jl/pull/\2)",
-    )
-    # Remove all links at the bottom
-    content = replace(content, r"^<!-- Release links -->.*$"ms => "")
-    # Change some GitHub in-readme links to documenter links
-    content = replace(content, "(#upgrading-code-from-ferrite-03-to-10)" => "(@ref)")
-    # Add a contents block
-    last_sentence_before_content = "adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)."
-    contents_block = """
-    ```@contents
-    Pages = ["changelog.md"]
-    Depth = 2:2
-    ```
-    """
-    content = replace(
-        content,
-        last_sentence_before_content =>
-            last_sentence_before_content * "\n\n" * contents_block,
-    )
-    # Remove trailing lines
-    content = strip(content) * "\n"
-    # Write out the content
-    write(joinpath(@__DIR__, "src/changelog.md"), content)
-    return nothing
-end
-
-function _fix_links()
-    content = read(changelogfile, String)
-    text = split(content, "<!-- Release links -->")[1]
-    # Look for links of the form: [#XXX][github-XXX]
-    github_links = Dict{String,String}()
-    r = r"\[#(\d+)\](\[github-(\d+)\])"
-    for m in eachmatch(r, text)
-        @assert m[1] == m[3]
-        # Always use /pull/ since it will redirect to /issues/ if it is an issue
-        url = "https://github.com/$ORG_NAME/$PACKAGE_NAME/pull/$(m[1])"
-        github_links[m[2]] = url
-    end
-    io = IOBuffer()
-    print(io, "<!-- GitHub pull request/issue links -->\n\n")
-    for l in sort!(collect(github_links); by = first)
-        println(io, l[1], ": ", l[2])
-    end
-    content = replace(
-        content,
-        r"<!-- GitHub pull request/issue links -->.*$"ms => String(take!(io)),
-    )
-    write(changelogfile, content)
 end
 
 main(ARGS)
