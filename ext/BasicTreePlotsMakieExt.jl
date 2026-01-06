@@ -393,16 +393,21 @@ treelabels!(p.nodepoints; nodelabels=Dict(node1 => "Node 1", node_a => "My speci
     "Line style of the guide lines"
     guidesstyle = :solid
 
+    "Tree orientation"
+    treeorientation = :right
+
     Makie.mixin_generic_plot_attributes()...
 end
 
 # I think this covers the main ways of calling the functions with a treeplot directly
-treelabels!(plt::TreePlot; kwargs...) = treelabels!(plt.nodepoints; kwargs...)
-treelabels(plt::TreePlot; kwargs...) = treelabels(plt.nodepoints; kwargs...)
+treelabels!(plt::TreePlot; kwargs...) =
+    treelabels!(plt.nodepoints; treeorientation = plt.orientation, kwargs...)
+treelabels(plt::TreePlot; kwargs...) =
+    treelabels(plt.nodepoints; treeorientation = plt.orientation, kwargs...)
 treelabels!(ax::Union{Makie.Block,Makie.GridPosition}, plt::TreePlot; kwargs...) =
-    treelabels!(ax, plt.nodepoints; kwargs...)
+    treelabels!(ax, plt.nodepoints; treeorientation = plt.orientation, kwargs...)
 treelabels(ax::Union{Makie.Block,Makie.GridPosition}, plt::TreePlot; kwargs...) =
-    treelabels(ax, plt.nodepoints; kwargs...)
+    treelabels(ax, plt.nodepoints; treeorientation = plt.orientation, kwargs...)
 function Makie.plot!(plt::TreeLabels)
     map!(
         plt.attributes,
@@ -413,10 +418,11 @@ function Makie.plot!(plt::TreeLabels)
             :labelalign,
             :labelrotation,
             :labeloffset,
+            :treeorientation,
             :transform_func,
         ],
         [:label_points, :labels, :align, :rotation, :offset, :guides_points], # outputs
-    ) do nodepoints, nodelabels, depth, lalign, lrotation, loffset, tf
+    ) do nodepoints, nodelabels, depth, lalign, lrotation, loffset, torientation, tf
         ## Get all tip positions and labels
         if isnothing(nodelabels)
             labeled_nodes, label_points_start, labels = BasicTreePlots.tipannotations(nodepoints)
@@ -476,7 +482,11 @@ function Makie.plot!(plt::TreeLabels)
         elseif lrot isa AbstractArray{<:Number}
             rotation = lrot
         elseif lrot === :horizontal
-            rotation = 0.0f0
+            if torientation in (:top, :bottom)
+                rotation = Float32(π/2)
+            else
+                rotation=0.0f0
+            end
         elseif lrot === :radial
             rotation = map(pos -> pos[1], label_points)
         elseif lrot === :aligned
@@ -491,14 +501,34 @@ function Makie.plot!(plt::TreeLabels)
         end
 
         # Alignment of text; left-center by default unless provided or rotation=:aligned
-        align = lalign === automatic ? (:left, :center) : lalign
+        align = if lalign === automatic
+            if torientation in (:right, :top, :out)
+                (:left, :center)
+            elseif torientation in (:left, :bottom, :in)
+                (:right, :center)
+            else
+                @error "Unrecognized treeorintation=$torientation\nOptions are (:right,:left, :bottom, :top, :out, :in)"
+            end
+        else
+            lalign
+        end
 
         # Compute label offsets in pixel space either in polar or cartisian coordinates
         offset = if loffset === automatic
-            if tf isa Polar
+            if tf isa Polar && torientation in (:right, :out)
                 map((θ)->(5*cos(θ), 5*sin(θ)), first.(label_points))
+            elseif tf isa Polar && torientation in (:left, :in)
+                map((θ)->(-5*cos(θ), -5*sin(θ)), first.(label_points))
+            elseif torientation in (:right, :out)
+                (10, 0)
+            elseif torientation === :top
+                (0, 10)
+            elseif torientation in (:left, :in)
+                (-10, 0)
+            elseif torientation === :bottom
+                (0, -10)
             else
-                (5, 0)
+                (0, 0)
             end
         elseif loffset isa Tuple{<:Real,<:Real} && tf isa Polar
             toff, roff = loffset
