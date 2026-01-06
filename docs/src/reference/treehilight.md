@@ -61,7 +61,8 @@ fig
 
 ### Z shift
 
-By default the regions are shifted back in Z direction so that the tree and other annotations
+By default the regions are shifted back in Z direction so that the tree and other annotations are plotted in front.
+Making the `z_shift` option greater in magnitude will shift the highlighted region forward.
 
 ```@figure treehilight
 tree = ((:a, :b), (:c, (:d, :e)))
