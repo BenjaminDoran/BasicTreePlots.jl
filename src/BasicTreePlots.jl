@@ -20,7 +20,8 @@ export treeplot,
     treecladelabel,
     treecladelabel!,
     treehilight,
-    treehilight!
+    treehilight!,
+    theme_empty
 
 
 
@@ -43,6 +44,7 @@ function treecladelabel! end
 function treehilight end
 function treehilight! end
 
+function theme_empty end
 # public distance, label
 
 """
