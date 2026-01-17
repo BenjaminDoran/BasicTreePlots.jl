@@ -46,15 +46,15 @@ tp = treeplot!(tree; branchcolor = branchcolors)
 treelabels!(tp; fontsize = 20)
 fig</code></pre><img src="../6e581a7.png" width="600px" height="450px"/><p>For instance if we have external data about each node in the tree</p><pre><code class="language-julia hljs">tree_data =
     Dict(node =&gt; (; support = rand(), favorite_number = rand(1:5)) for node in PreOrderDFS(tree))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Dict{Any, @NamedTuple{support::Float64, favorite_number::Int64}} with 9 entries:
-  :a                         =&gt; (support = 0.997218, favorite_number = 2)
-  :b                         =&gt; (support = 0.193919, favorite_number = 2)
-  (:a, :b)                   =&gt; (support = 0.845995, favorite_number = 2)
-  (:c, (:d, :e))             =&gt; (support = 0.113868, favorite_number = 4)
-  :d                         =&gt; (support = 0.272507, favorite_number = 1)
-  :e                         =&gt; (support = 0.765605, favorite_number = 2)
-  :c                         =&gt; (support = 0.123624, favorite_number = 2)
-  (:d, :e)                   =&gt; (support = 0.605338, favorite_number = 5)
-  ((:a, :b), (:c, (:d, :e))) =&gt; (support = 0.104671, favorite_number = 1)</code></pre><p>then we can plot support as the color and the favorite number as the line width.</p><pre><code class="language-julia hljs">branchcolors = map(PreOrderDFS(tree)) do node
+  :a                         =&gt; (support = 0.165843, favorite_number = 2)
+  :b                         =&gt; (support = 0.95169, favorite_number = 1)
+  (:a, :b)                   =&gt; (support = 0.584252, favorite_number = 5)
+  (:c, (:d, :e))             =&gt; (support = 0.376175, favorite_number = 4)
+  :d                         =&gt; (support = 0.331735, favorite_number = 1)
+  :e                         =&gt; (support = 0.703693, favorite_number = 4)
+  :c                         =&gt; (support = 0.640186, favorite_number = 2)
+  (:d, :e)                   =&gt; (support = 0.179998, favorite_number = 1)
+  ((:a, :b), (:c, (:d, :e))) =&gt; (support = 0.306643, favorite_number = 5)</code></pre><p>then we can plot support as the color and the favorite number as the line width.</p><pre><code class="language-julia hljs">branchcolors = map(PreOrderDFS(tree)) do node
     tree_data[node].support
 end
 
@@ -88,4 +88,4 @@ p = treeplot!(
     openangle = deg2rad(140),
 )
 Colorbar(fig[1, 2][3, 1], p)
-fig</code></pre><img src="../dbf3b04.png" width="600px" height="450px"/></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../">« Home</a><a class="docs-footer-nextpage" href="../extending-for-new-treetypes/">Extending to custom types »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Saturday 10 January 2026 21:28">Saturday 10 January 2026</span>. Using Julia version 1.12.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+fig</code></pre><img src="../dbf3b04.png" width="600px" height="450px"/></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../">« Home</a><a class="docs-footer-nextpage" href="../extending-for-new-treetypes/">Extending to custom types »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Saturday 17 January 2026 20:20">Saturday 17 January 2026</span>. Using Julia version 1.12.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
