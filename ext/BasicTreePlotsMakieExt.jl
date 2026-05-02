@@ -69,11 +69,16 @@ This can then be annotated with `treehilight`, `treelabels`, and `treecladelabel
     branchstyle = :square
 
     """
-    Available options are `:dendrogram`, or `:cladogram`.
+    Available options are `:dendrogram`, `:cladogram`, `:unrooted_dendrogram`, or `:unrooted_cladogram`.
     `:dendrogram` displays tree taking into account the distance between parent and children nodes as
     calculated from `BasicTreePlots.distance(node)`. If the distance is not defined, it defaults to `1` and
-    is equivalent to the `:cladogram` layout `:cladogram` displays the tree where each distance from a child
+    is equivalent to the `:cladogram` layout. `:cladogram` displays the tree where each distance from a child
     node to their parent is set to `1`.
+    `:unrooted_dendrogram` displays the tree using the equal-angle algorithm (Felsenstein) with branch
+    lengths from `BasicTreePlots.distance(node)`, producing a radial layout where the root is at the center
+    and branches fan outward. Not compatible with `PolarAxis`; `orientation`, `branchstyle`, and `usemaxdepth`
+    are ignored.
+    `:unrooted_cladogram` is like `:unrooted_dendrogram` but with all branch lengths set to `1`.
     """
     layoutstyle = :dendrogram
 
@@ -190,51 +195,65 @@ function Makie.plot!(plt::TreePlot)
             end
         end
 
-        branchsegments = BasicTreePlots.makesegments(nodepoints, tree; branchstyle, resolution)
+        branchsegments = BasicTreePlots.makesegments(nodepoints, tree; branchstyle, resolution, layoutstyle)
 
-        if orientation !== :right && tf isa Polar
-            @warn("Orientation of $orientation is not well tested on PolarAxis")
-        end
+        is_unrooted = layoutstyle in (:unrooted_dendrogram, :unrooted_cladogram)
 
-        if orientation === :right || orientation === :out
-        elseif orientation === :left || orientation === :in
-            map!(values(nodepoints)) do (x, y)
-                (-x + maxtreedepth + maxdoff, y)
+        if is_unrooted
+            if tf isa Polar
+                error("Unrooted layouts (:unrooted_dendrogram, :unrooted_cladogram) are not compatible with PolarAxis. Use a regular Axis instead.")
             end
-            map!(branchsegments) do segment
-                [(-x + maxtreedepth + maxdoff, y) for (x, y) in segment]
+            if orientation !== :right
+                @warn "orientation=$orientation is ignored for unrooted layouts"
             end
-        elseif orientation === :top
-            map!(values(nodepoints)) do (x, y)
-                (y, x)
-            end
-            map!(branchsegments) do segment
-                [(y, x) for (x, y) in segment]
-            end
-        elseif orientation === :bottom
-            map!(values(nodepoints)) do (x, y)
-                (y, -x + maxtreedepth + maxdoff)
-            end
-            map!(branchsegments) do segment
-                [(y, -x + maxtreedepth + maxdoff) for (x, y) in segment]
+            if usemaxdepth
+                @warn "usemaxdepth is ignored for unrooted layouts"
             end
         else
-            @warn(
-                "Orientation of $orientation is not in options of :right, :top, :left, or :bottom"
-            )
-        end
-
-        # modify all points if axis is polar
-        if tf isa Polar
-
-            # update node positions
-            map!(values(nodepoints)) do (x, y)
-                (toangle(y, nleaves, openangle), x)
+            if orientation !== :right && tf isa Polar
+                @warn("Orientation of $orientation is not well tested on PolarAxis")
             end
 
-            # and segments
-            map!(branchsegments) do segment
-                [(toangle(y, nleaves, openangle), x) for (x, y) in segment]
+            if orientation === :right || orientation === :out
+            elseif orientation === :left || orientation === :in
+                map!(values(nodepoints)) do (x, y)
+                    (-x + maxtreedepth + maxdoff, y)
+                end
+                map!(branchsegments) do segment
+                    [(-x + maxtreedepth + maxdoff, y) for (x, y) in segment]
+                end
+            elseif orientation === :top
+                map!(values(nodepoints)) do (x, y)
+                    (y, x)
+                end
+                map!(branchsegments) do segment
+                    [(y, x) for (x, y) in segment]
+                end
+            elseif orientation === :bottom
+                map!(values(nodepoints)) do (x, y)
+                    (y, -x + maxtreedepth + maxdoff)
+                end
+                map!(branchsegments) do segment
+                    [(y, -x + maxtreedepth + maxdoff) for (x, y) in segment]
+                end
+            else
+                @warn(
+                    "Orientation of $orientation is not in options of :right, :top, :left, or :bottom"
+                )
+            end
+
+            # modify all points if axis is polar
+            if tf isa Polar
+
+                # update node positions
+                map!(values(nodepoints)) do (x, y)
+                    (toangle(y, nleaves, openangle), x)
+                end
+
+                # and segments
+                map!(branchsegments) do segment
+                    [(toangle(y, nleaves, openangle), x) for (x, y) in segment]
+                end
             end
         end
 
