@@ -111,7 +111,7 @@ We try to keep a linear history in this repo, so it is important to keep your br
 ### Before creating a pull request
 
 !!! tip "Atomic git commits"
-   Try to create "atomic git commits" that encoumpass a single change only.
+   Try to create "atomic git commits" that encompass a single change only.
 
 - Make sure the tests pass.
 - Make sure the pre-commit tests pass.
