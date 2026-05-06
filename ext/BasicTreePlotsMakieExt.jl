@@ -356,6 +356,9 @@ treelabels!(p.nodepoints; nodelabels=Dict(node1 => "Node 1", node_a => "My speci
     "Font size of the node labels"
     fontsize = @inherit fontsize 9.0f0
 
+    "Text color"
+    color = @inherit textcolor
+
     """
     Options are `:horizontal`, `:radial`, `:aligned`, or a number `θ<:Real` in radians.
     If `automatic`, will default to `:aligned` on polar axis and `:horizontal` otherwise.
