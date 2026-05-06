@@ -1,5 +1,9 @@
 [unreleased]
 
+- add tree text label
+
+[0.2.0]
+
 - Added theme_empty ([#29])
 - Added additional recipes and updated documentation ([#25] [#29])
   - Add `treelabels`, `treecladelabel`, `treehilight`, and `treescatter`.
