@@ -17,7 +17,7 @@ using Makie
 using Makie: Point2f, @recipe, automatic, Polar, Polygon
 
 using AbstractTrees: AbstractTrees
-using AbstractTrees: PreOrderDFS
+using AbstractTrees: PreOrderDFS, children
 
 toangle(y, N, openangle) = (y / N) * (2π - (openangle % 2pi))
 
@@ -69,11 +69,16 @@ This can then be annotated with `treehilight`, `treelabels`, and `treecladelabel
     branchstyle = :square
 
     """
-    Available options are `:dendrogram`, or `:cladogram`.
+    Available options are `:dendrogram`, `:cladogram`, `:unrooted_dendrogram`, or `:unrooted_cladogram`.
     `:dendrogram` displays tree taking into account the distance between parent and children nodes as
     calculated from `BasicTreePlots.distance(node)`. If the distance is not defined, it defaults to `1` and
-    is equivalent to the `:cladogram` layout `:cladogram` displays the tree where each distance from a child
+    is equivalent to the `:cladogram` layout. `:cladogram` displays the tree where each distance from a child
     node to their parent is set to `1`.
+    `:unrooted_dendrogram` displays the tree using the equal-angle algorithm (Felsenstein) with branch
+    lengths from `BasicTreePlots.distance(node)`, producing a radial layout where the root is at the center
+    and branches fan outward. Not compatible with `PolarAxis`; `orientation`, `branchstyle`, and `usemaxdepth`
+    are ignored.
+    `:unrooted_cladogram` is like `:unrooted_dendrogram` but with all branch lengths set to `1`.
     """
     layoutstyle = :dendrogram
 
@@ -190,51 +195,65 @@ function Makie.plot!(plt::TreePlot)
             end
         end
 
-        branchsegments = BasicTreePlots.makesegments(nodepoints, tree; branchstyle, resolution)
+        branchsegments = BasicTreePlots.makesegments(nodepoints, tree; branchstyle, resolution, layoutstyle)
 
-        if orientation !== :right && tf isa Polar
-            @warn("Orientation of $orientation is not well tested on PolarAxis")
-        end
+        is_unrooted = layoutstyle in (:unrooted_dendrogram, :unrooted_cladogram)
 
-        if orientation === :right || orientation === :out
-        elseif orientation === :left || orientation === :in
-            map!(values(nodepoints)) do (x, y)
-                (-x + maxtreedepth + maxdoff, y)
+        if is_unrooted
+            if tf isa Polar
+                error("Unrooted layouts (:unrooted_dendrogram, :unrooted_cladogram) are not compatible with PolarAxis. Use a regular Axis instead.")
             end
-            map!(branchsegments) do segment
-                [(-x + maxtreedepth + maxdoff, y) for (x, y) in segment]
+            if orientation !== :right
+                @warn "orientation=$orientation is ignored for unrooted layouts"
             end
-        elseif orientation === :top
-            map!(values(nodepoints)) do (x, y)
-                (y, x)
-            end
-            map!(branchsegments) do segment
-                [(y, x) for (x, y) in segment]
-            end
-        elseif orientation === :bottom
-            map!(values(nodepoints)) do (x, y)
-                (y, -x + maxtreedepth + maxdoff)
-            end
-            map!(branchsegments) do segment
-                [(y, -x + maxtreedepth + maxdoff) for (x, y) in segment]
+            if usemaxdepth
+                @warn "usemaxdepth is ignored for unrooted layouts"
             end
         else
-            @warn(
-                "Orientation of $orientation is not in options of :right, :top, :left, or :bottom"
-            )
-        end
-
-        # modify all points if axis is polar
-        if tf isa Polar
-
-            # update node positions
-            map!(values(nodepoints)) do (x, y)
-                (toangle(y, nleaves, openangle), x)
+            if orientation !== :right && tf isa Polar
+                @warn("Orientation of $orientation is not well tested on PolarAxis")
             end
 
-            # and segments
-            map!(branchsegments) do segment
-                [(toangle(y, nleaves, openangle), x) for (x, y) in segment]
+            if orientation === :right || orientation === :out
+            elseif orientation === :left || orientation === :in
+                map!(values(nodepoints)) do (x, y)
+                    (-x + maxtreedepth + maxdoff, y)
+                end
+                map!(branchsegments) do segment
+                    [(-x + maxtreedepth + maxdoff, y) for (x, y) in segment]
+                end
+            elseif orientation === :top
+                map!(values(nodepoints)) do (x, y)
+                    (y, x)
+                end
+                map!(branchsegments) do segment
+                    [(y, x) for (x, y) in segment]
+                end
+            elseif orientation === :bottom
+                map!(values(nodepoints)) do (x, y)
+                    (y, -x + maxtreedepth + maxdoff)
+                end
+                map!(branchsegments) do segment
+                    [(y, -x + maxtreedepth + maxdoff) for (x, y) in segment]
+                end
+            else
+                @warn(
+                    "Orientation of $orientation is not in options of :right, :top, :left, or :bottom"
+                )
+            end
+
+            # modify all points if axis is polar
+            if tf isa Polar
+
+                # update node positions
+                map!(values(nodepoints)) do (x, y)
+                    (toangle(y, nleaves, openangle), x)
+                end
+
+                # and segments
+                map!(branchsegments) do segment
+                    [(toangle(y, nleaves, openangle), x) for (x, y) in segment]
+                end
             end
         end
 
@@ -396,18 +415,24 @@ treelabels!(p.nodepoints; nodelabels=Dict(node1 => "Node 1", node_a => "My speci
     "Tree orientation"
     treeorientation = :right
 
+    "Tree root node, used to compute branch angles for unrooted layouts. Forwarded automatically from `treeplot`."
+    tree = nothing
+
+    "Layout style of the parent treeplot. Forwarded automatically from `treeplot`."
+    treelayoutstyle = :dendrogram
+
     Makie.mixin_generic_plot_attributes()...
 end
 
 # I think this covers the main ways of calling the functions with a treeplot directly
 treelabels!(plt::TreePlot; kwargs...) =
-    treelabels!(plt.nodepoints; treeorientation = plt.orientation, kwargs...)
+    treelabels!(plt.nodepoints; treeorientation = plt.orientation, tree = plt.tree, treelayoutstyle = plt.layoutstyle, kwargs...)
 treelabels(plt::TreePlot; kwargs...) =
-    treelabels(plt.nodepoints; treeorientation = plt.orientation, kwargs...)
+    treelabels(plt.nodepoints; treeorientation = plt.orientation, tree = plt.tree, treelayoutstyle = plt.layoutstyle, kwargs...)
 treelabels!(ax::Union{Makie.Block,Makie.GridPosition}, plt::TreePlot; kwargs...) =
-    treelabels!(ax, plt.nodepoints; treeorientation = plt.orientation, kwargs...)
+    treelabels!(ax, plt.nodepoints; treeorientation = plt.orientation, tree = plt.tree, treelayoutstyle = plt.layoutstyle, kwargs...)
 treelabels(ax::Union{Makie.Block,Makie.GridPosition}, plt::TreePlot; kwargs...) =
-    treelabels(ax, plt.nodepoints; treeorientation = plt.orientation, kwargs...)
+    treelabels(ax, plt.nodepoints; treeorientation = plt.orientation, tree = plt.tree, treelayoutstyle = plt.layoutstyle, kwargs...)
 function Makie.plot!(plt::TreeLabels)
     map!(
         plt.attributes,
@@ -420,9 +445,25 @@ function Makie.plot!(plt::TreeLabels)
             :labeloffset,
             :treeorientation,
             :transform_func,
+            :tree,
+            :treelayoutstyle,
         ],
         [:label_points, :labels, :align, :rotation, :offset, :guides_points], # outputs
-    ) do nodepoints, nodelabels, depth, lalign, lrotation, loffset, torientation, tf
+    ) do nodepoints, nodelabels, depth, lalign, lrotation, loffset, torientation, tf, tree, treelayoutstyle
+        is_unrooted = treelayoutstyle in (:unrooted_dendrogram, :unrooted_cladogram)
+
+        ## Build parent lookup for computing branch angles (unrooted layouts only)
+        parent_of = Dict()
+        if is_unrooted && !isnothing(tree)
+            function _build_parent_map!(node)
+                for c in children(node)
+                    parent_of[c] = node
+                    _build_parent_map!(c)
+                end
+            end
+            _build_parent_map!(tree)
+        end
+
         ## Get all tip positions and labels
         if isnothing(nodelabels)
             labeled_nodes, label_points_start, labels = BasicTreePlots.tipannotations(nodepoints)
@@ -435,6 +476,21 @@ function Makie.plot!(plt::TreeLabels)
                 push!(labeled_nodes, node)
                 push!(label_points_start, nodepoints[node])
             end
+        end
+
+        ## Compute branch angles for each labeled node (unrooted layouts only)
+        branch_angles = if is_unrooted && !isnothing(tree)
+            map(labeled_nodes) do node
+                if haskey(parent_of, node)
+                    ppos = nodepoints[parent_of[node]]
+                    npos = nodepoints[node]
+                    Float32(atan(npos[2] - ppos[2], npos[1] - ppos[1]))
+                else
+                    0.0f0  # root node has no incoming branch
+                end
+            end
+        else
+            nothing
         end
 
         ## Lines from each tip to max tip depth
@@ -474,7 +530,17 @@ function Makie.plot!(plt::TreeLabels)
         label_points = !isnothing(depth) ? label_points_end : label_points_start
 
         # set default rotation option
-        lrot = lrotation === automatic ? tf isa Polar ? :aligned : :horizontal : lrotation
+        lrot = if lrotation === automatic
+            if tf isa Polar
+                :aligned
+            elseif is_unrooted && !isnothing(branch_angles)
+                :aligned
+            else
+                :horizontal
+            end
+        else
+            lrotation
+        end
 
         # Handle rotation and alignment of labels, particularly for the Polar axis
         if lrot isa Real
@@ -490,11 +556,21 @@ function Makie.plot!(plt::TreeLabels)
         elseif lrot === :radial
             rotation = map(pos -> pos[1], label_points)
         elseif lrot === :aligned
-            rotation = map(label_points) do pos
-                cos(pos[1]) > 0.0 ? pos[1] : pos[1] + pi
-            end
-            lalign = map(label_points) do pos
-                cos(pos[1]) > 0.0 ? (:left, :center) : (:right, :center)
+            if is_unrooted && !isnothing(branch_angles)
+                # Align with branch angle, flip text on left half so it reads left-to-right
+                rotation = map(branch_angles) do θ
+                    cos(θ) >= 0.0 ? θ : θ + Float32(π)
+                end
+                lalign = map(branch_angles) do θ
+                    cos(θ) >= 0.0 ? (:left, :center) : (:right, :center)
+                end
+            else
+                rotation = map(label_points) do pos
+                    cos(pos[1]) > 0.0 ? pos[1] : pos[1] + pi
+                end
+                lalign = map(label_points) do pos
+                    cos(pos[1]) > 0.0 ? (:left, :center) : (:right, :center)
+                end
             end
         else
             rotation = lrot
@@ -515,7 +591,11 @@ function Makie.plot!(plt::TreeLabels)
 
         # Compute label offsets in pixel space either in polar or cartisian coordinates
         offset = if loffset === automatic
-            if tf isa Polar && torientation in (:right, :out)
+            if is_unrooted && !isnothing(branch_angles)
+                map(branch_angles) do θ
+                    (5.0f0 * cos(θ), 5.0f0 * sin(θ))
+                end
+            elseif tf isa Polar && torientation in (:right, :out)
                 map((θ)->(5*cos(θ), 5*sin(θ)), first.(label_points))
             elseif tf isa Polar && torientation in (:left, :in)
                 map((θ)->(-5*cos(θ), -5*sin(θ)), first.(label_points))

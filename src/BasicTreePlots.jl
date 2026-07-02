@@ -2,13 +2,13 @@ module BasicTreePlots
 
 using Reexport: Reexport, @reexport
 using Statistics: mean
-using AbstractTrees: nodevalue, children
+using AbstractTrees: nodevalue, children, treebreadth
 @reexport using AbstractTrees: PreOrderDFS
 using OrderedCollections: OrderedDict
 # using Makie: Point2f
 
 
-const LAYOUTS = (:dendrogram, :cladogram, :radial)
+const LAYOUTS = (:dendrogram, :cladogram, :radial, :unrooted_dendrogram, :unrooted_cladogram)
 const BRANCHTYPES = (:square, :straight)
 
 export treeplot,
@@ -156,6 +156,10 @@ function nodepositions!(
         coord_positions_dendrogram!(nodedict, tree, currdepth, leafcount)
     elseif layoutstyle == :cladogram
         coord_positions_cladogram!(nodedict, tree, currdepth, leafcount)
+    elseif layoutstyle == :unrooted_dendrogram
+        coord_positions_unrooted!(nodedict, tree; cladogram = false)
+    elseif layoutstyle == :unrooted_cladogram
+        coord_positions_unrooted!(nodedict, tree; cladogram = true)
     else
         throw(ArgumentError("""layoutstyle $layoutstyle not in $LAYOUTS"""))
     end
@@ -189,6 +193,28 @@ function coord_positions_cladogram!(nodedict, node, curr_depth, leafcount)
 end
 
 
+function coord_positions_unrooted!(nodedict, tree; cladogram::Bool = false)
+    function recurse!(node, px, py, θ_min, θ_max)
+        nodedict[node] = (px, py)
+        isleaf(node) && return
+        total = treebreadth(node)
+        θ_cursor = θ_min
+        for child in children(node)
+            nleaves = treebreadth(child)
+            Δθ = (nleaves / total) * (θ_max - θ_min)
+            θ_mid = θ_cursor + Δθ / 2
+            ℓ = cladogram ? 1.0f0 : Float32(distance(child))
+            cx = px + ℓ * cos(θ_mid)
+            cy = py + ℓ * sin(θ_mid)
+            recurse!(child, cx, cy, θ_cursor, θ_cursor + Δθ)
+            θ_cursor += Δθ
+        end
+    end
+    recurse!(tree, 0.0f0, 0.0f0, 0.0f0, 2.0f0 * Float32(π))
+    return nodedict
+end
+
+
 function extend_tips!(nodecoords)
     maxleafposition = argmax(x -> x[1], values(nodecoords))
     for (k, v) in nodecoords
@@ -199,9 +225,11 @@ function extend_tips!(nodecoords)
 end
 
 
-function makesegments(nodedict, tree; resolution = 25, branchstyle = :square)
+function makesegments(nodedict, tree; resolution = 25, branchstyle = :square, layoutstyle = :dendrogram)
     segs = Vector{Vector{Tuple{Float32,Float32}}}()
-    if branchstyle == :square
+    if layoutstyle in (:unrooted_dendrogram, :unrooted_cladogram)
+        make_unrooted_segments!(segs, nodedict, tree)
+    elseif branchstyle == :square
         make_square_segments!(segs, nodedict, tree; resolution)
     elseif branchstyle == :straight
         make_straight_segments!(segs, nodedict, tree)
@@ -268,6 +296,22 @@ function make_straight_segments!(segs, nodedict, tree)
         end
     end
     segment_prewalk!(segs, tree, tree)
+    segs
+end
+
+
+function make_unrooted_segments!(segs, nodedict, tree)
+    function segment_prewalk!(node)
+        if !isleaf(node)
+            px, py = nodedict[node]
+            for c in children(node)
+                cx, cy = nodedict[c]
+                push!(segs, [(px, py), (cx, cy), (NaN32, NaN32)])
+                segment_prewalk!(c)
+            end
+        end
+    end
+    segment_prewalk!(tree)
     segs
 end
 
