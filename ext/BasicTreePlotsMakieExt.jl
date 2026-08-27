@@ -17,7 +17,7 @@ using Makie
 using Makie: Point2f, @recipe, automatic, Polar, Polygon
 
 using AbstractTrees: AbstractTrees
-using AbstractTrees: PreOrderDFS
+using AbstractTrees: PreOrderDFS, children
 
 toangle(y, N, openangle) = (y / N) * (2π - (openangle % 2pi))
 
@@ -69,11 +69,16 @@ This can then be annotated with `treehilight`, `treelabels`, and `treecladelabel
     branchstyle = :square
 
     """
-    Available options are `:dendrogram`, or `:cladogram`.
+    Available options are `:dendrogram`, `:cladogram`, `:unrooted_dendrogram`, or `:unrooted_cladogram`.
     `:dendrogram` displays tree taking into account the distance between parent and children nodes as
     calculated from `BasicTreePlots.distance(node)`. If the distance is not defined, it defaults to `1` and
-    is equivalent to the `:cladogram` layout `:cladogram` displays the tree where each distance from a child
+    is equivalent to the `:cladogram` layout. `:cladogram` displays the tree where each distance from a child
     node to their parent is set to `1`.
+    `:unrooted_dendrogram` displays the tree using the equal-angle algorithm (Felsenstein) with branch
+    lengths from `BasicTreePlots.distance(node)`, producing a radial layout where the root is at the center
+    and branches fan outward. Not compatible with `PolarAxis`; `orientation`, `branchstyle`, and `usemaxdepth`
+    are ignored.
+    `:unrooted_cladogram` is like `:unrooted_dendrogram` but with all branch lengths set to `1`.
     """
     layoutstyle = :dendrogram
 
@@ -178,10 +183,17 @@ function Makie.plot!(plt::TreePlot)
         )
 
 
+        is_unrooted = layoutstyle in BasicTreePlots.UNROOTED_LAYOUTS
+        maxtreedepth = if is_unrooted
+            root_x, root_y = nodepoints[tree]
+            maximum(values(nodepoints)) do (x, y)
+                hypot(x - root_x, y - root_y)
+            end
+        else
+            maximum(x -> x[1], values(nodepoints))
+        end
 
-        maxtreedepth = maximum(x -> x[1], values(nodepoints))
-
-        if usemaxdepth
+        if usemaxdepth && !is_unrooted
             foreach(PreOrderDFS(tree)) do node
                 if BasicTreePlots.isleaf(node)
                     (x, y) = nodepoints[node]
@@ -190,51 +202,65 @@ function Makie.plot!(plt::TreePlot)
             end
         end
 
-        branchsegments = BasicTreePlots.makesegments(nodepoints, tree; branchstyle, resolution)
+        branchsegments = BasicTreePlots.makesegments(nodepoints, tree; branchstyle, resolution, layoutstyle)
 
-        if orientation !== :right && tf isa Polar
-            @warn("Orientation of $orientation is not well tested on PolarAxis")
-        end
-
-        if orientation === :right || orientation === :out
-        elseif orientation === :left || orientation === :in
-            map!(values(nodepoints)) do (x, y)
-                (-x + maxtreedepth + maxdoff, y)
+        if is_unrooted
+            if tf isa Polar
+                error(
+                    "Unrooted and daylight layouts are not compatible with PolarAxis. Use a regular Axis instead."
+                )
             end
-            map!(branchsegments) do segment
-                [(-x + maxtreedepth + maxdoff, y) for (x, y) in segment]
+            if orientation !== :right
+                @warn "orientation=$orientation is ignored for unrooted layouts"
             end
-        elseif orientation === :top
-            map!(values(nodepoints)) do (x, y)
-                (y, x)
-            end
-            map!(branchsegments) do segment
-                [(y, x) for (x, y) in segment]
-            end
-        elseif orientation === :bottom
-            map!(values(nodepoints)) do (x, y)
-                (y, -x + maxtreedepth + maxdoff)
-            end
-            map!(branchsegments) do segment
-                [(y, -x + maxtreedepth + maxdoff) for (x, y) in segment]
+            if usemaxdepth
+                @warn "usemaxdepth is ignored for unrooted layouts"
             end
         else
-            @warn(
-                "Orientation of $orientation is not in options of :right, :top, :left, or :bottom"
-            )
-        end
-
-        # modify all points if axis is polar
-        if tf isa Polar
-
-            # update node positions
-            map!(values(nodepoints)) do (x, y)
-                (toangle(y, nleaves, openangle), x)
+            if orientation !== :right && tf isa Polar
+                @warn("Orientation of $orientation is not well tested on PolarAxis")
             end
 
-            # and segments
-            map!(branchsegments) do segment
-                [(toangle(y, nleaves, openangle), x) for (x, y) in segment]
+            if orientation === :right || orientation === :out
+            elseif orientation === :left || orientation === :in
+                map!(values(nodepoints)) do (x, y)
+                    (-x + maxtreedepth + maxdoff, y)
+                end
+                map!(branchsegments) do segment
+                    [(-x + maxtreedepth + maxdoff, y) for (x, y) in segment]
+                end
+            elseif orientation === :top
+                map!(values(nodepoints)) do (x, y)
+                    (y, x)
+                end
+                map!(branchsegments) do segment
+                    [(y, x) for (x, y) in segment]
+                end
+            elseif orientation === :bottom
+                map!(values(nodepoints)) do (x, y)
+                    (y, -x + maxtreedepth + maxdoff)
+                end
+                map!(branchsegments) do segment
+                    [(y, -x + maxtreedepth + maxdoff) for (x, y) in segment]
+                end
+            else
+                @warn(
+                    "Orientation of $orientation is not in options of :right, :top, :left, or :bottom"
+                )
+            end
+
+            # modify all points if axis is polar
+            if tf isa Polar
+
+                # update node positions
+                map!(values(nodepoints)) do (x, y)
+                    (toangle(y, nleaves, openangle), x)
+                end
+
+                # and segments
+                map!(branchsegments) do segment
+                    [(toangle(y, nleaves, openangle), x) for (x, y) in segment]
+                end
             end
         end
 
@@ -396,18 +422,24 @@ treelabels!(p.nodepoints; nodelabels=Dict(node1 => "Node 1", node_a => "My speci
     "Tree orientation"
     treeorientation = :right
 
+    "Tree root node, used to compute branch angles for unrooted layouts. Forwarded automatically from `treeplot`."
+    tree = nothing
+
+    "Layout style of the parent treeplot. Forwarded automatically from `treeplot`."
+    treelayoutstyle = :dendrogram
+
     Makie.mixin_generic_plot_attributes()...
 end
 
 # I think this covers the main ways of calling the functions with a treeplot directly
 treelabels!(plt::TreePlot; kwargs...) =
-    treelabels!(plt.nodepoints; treeorientation = plt.orientation, kwargs...)
+    treelabels!(plt.nodepoints; treeorientation = plt.orientation, tree = plt.tree, treelayoutstyle = plt.layoutstyle, kwargs...)
 treelabels(plt::TreePlot; kwargs...) =
-    treelabels(plt.nodepoints; treeorientation = plt.orientation, kwargs...)
+    treelabels(plt.nodepoints; treeorientation = plt.orientation, tree = plt.tree, treelayoutstyle = plt.layoutstyle, kwargs...)
 treelabels!(ax::Union{Makie.Block,Makie.GridPosition}, plt::TreePlot; kwargs...) =
-    treelabels!(ax, plt.nodepoints; treeorientation = plt.orientation, kwargs...)
+    treelabels!(ax, plt.nodepoints; treeorientation = plt.orientation, tree = plt.tree, treelayoutstyle = plt.layoutstyle, kwargs...)
 treelabels(ax::Union{Makie.Block,Makie.GridPosition}, plt::TreePlot; kwargs...) =
-    treelabels(ax, plt.nodepoints; treeorientation = plt.orientation, kwargs...)
+    treelabels(ax, plt.nodepoints; treeorientation = plt.orientation, tree = plt.tree, treelayoutstyle = plt.layoutstyle, kwargs...)
 function Makie.plot!(plt::TreeLabels)
     map!(
         plt.attributes,
@@ -420,9 +452,25 @@ function Makie.plot!(plt::TreeLabels)
             :labeloffset,
             :treeorientation,
             :transform_func,
+            :tree,
+            :treelayoutstyle,
         ],
         [:label_points, :labels, :align, :rotation, :offset, :guides_points], # outputs
-    ) do nodepoints, nodelabels, depth, lalign, lrotation, loffset, torientation, tf
+    ) do nodepoints, nodelabels, depth, lalign, lrotation, loffset, torientation, tf, tree, treelayoutstyle
+        is_unrooted = treelayoutstyle in BasicTreePlots.UNROOTED_LAYOUTS
+
+        ## Build parent lookup for computing branch angles (unrooted layouts only)
+        parent_of = Dict()
+        if is_unrooted && !isnothing(tree)
+            function _build_parent_map!(node)
+                for c in children(node)
+                    parent_of[c] = node
+                    _build_parent_map!(c)
+                end
+            end
+            _build_parent_map!(tree)
+        end
+
         ## Get all tip positions and labels
         if isnothing(nodelabels)
             labeled_nodes, label_points_start, labels = BasicTreePlots.tipannotations(nodepoints)
@@ -437,6 +485,60 @@ function Makie.plot!(plt::TreeLabels)
             end
         end
 
+        ## Compute branch angles for each labeled node (unrooted layouts only)
+        branch_angles = if is_unrooted && !isnothing(tree)
+            map(labeled_nodes) do node
+                if haskey(parent_of, node)
+                    ppos = nodepoints[parent_of[node]]
+                    npos = nodepoints[node]
+                    Float32(atan(npos[2] - ppos[2], npos[1] - ppos[1]))
+                else
+                    0.0f0  # root node has no incoming branch
+                end
+            end
+        else
+            nothing
+        end
+
+        root_position = is_unrooted && !isnothing(tree) ? nodepoints[tree] : nothing
+
+        function unrooted_label_endpoint(position, branch_angle, radius)
+            root_x, root_y = root_position
+            relative_x = position[1] - root_x
+            relative_y = position[2] - root_y
+            direction_x = cos(branch_angle)
+            direction_y = sin(branch_angle)
+            projection = relative_x * direction_x + relative_y * direction_y
+
+            if projection < 0.0f0
+                norm = hypot(relative_x, relative_y)
+                if !iszero(norm)
+                    direction_x = relative_x / norm
+                    direction_y = relative_y / norm
+                    projection = norm
+                end
+            end
+
+            perpendicular_squared =
+                relative_x^2 + relative_y^2 - projection^2
+            discriminant = radius^2 - max(perpendicular_squared, 0.0f0)
+            if discriminant < 0.0f0
+                norm = hypot(relative_x, relative_y)
+                iszero(norm) && return Point2f(root_x + radius, root_y)
+                scale = radius / norm
+                return Point2f(
+                    root_x + relative_x * scale,
+                    root_y + relative_y * scale,
+                )
+            end
+
+            extension = -projection + sqrt(discriminant)
+            return Point2f(
+                position[1] + extension * direction_x,
+                position[2] + extension * direction_y,
+            )
+        end
+
         ## Lines from each tip to max tip depth
         guides_points = Point2f[]
         if !isnothing(depth)
@@ -445,6 +547,12 @@ function Makie.plot!(plt::TreeLabels)
                     if tf isa Polar
                         maxdepth = maximum(x -> x[2], values(nodepoints))
                         map(pos -> Point2f(pos[1], maxdepth), label_points_start)
+                    elseif is_unrooted && !isnothing(branch_angles)
+                        root_x, root_y = root_position
+                        maxdepth = maximum(values(nodepoints)) do (x, y)
+                            hypot(x - root_x, y - root_y)
+                        end
+                        map(unrooted_label_endpoint, label_points_start, branch_angles, Iterators.repeated(maxdepth))
                     else
                         maxdepth = maximum(x -> x[1], values(nodepoints))
                         map(pos -> Point2f(maxdepth, pos[2]), label_points_start)
@@ -452,6 +560,8 @@ function Makie.plot!(plt::TreeLabels)
                 elseif depth isa Real
                     if tf isa Polar
                         map(pos -> Point2f(pos[1], depth), label_points_start)
+                    elseif is_unrooted && !isnothing(branch_angles)
+                        map(unrooted_label_endpoint, label_points_start, branch_angles, Iterators.repeated(Float32(depth)))
                     else
                         map(pos -> Point2f(depth, pos[2]), label_points_start)
                     end
@@ -474,7 +584,17 @@ function Makie.plot!(plt::TreeLabels)
         label_points = !isnothing(depth) ? label_points_end : label_points_start
 
         # set default rotation option
-        lrot = lrotation === automatic ? tf isa Polar ? :aligned : :horizontal : lrotation
+        lrot = if lrotation === automatic
+            if tf isa Polar
+                :aligned
+            elseif is_unrooted && !isnothing(branch_angles)
+                :aligned
+            else
+                :horizontal
+            end
+        else
+            lrotation
+        end
 
         # Handle rotation and alignment of labels, particularly for the Polar axis
         if lrot isa Real
@@ -488,13 +608,30 @@ function Makie.plot!(plt::TreeLabels)
                 rotation=0.0f0
             end
         elseif lrot === :radial
-            rotation = map(pos -> pos[1], label_points)
-        elseif lrot === :aligned
-            rotation = map(label_points) do pos
-                cos(pos[1]) > 0.0 ? pos[1] : pos[1] + pi
+            if is_unrooted && !isnothing(root_position)
+                root_x, root_y = root_position
+                rotation = map(label_points) do pos
+                    Float32(atan(pos[2] - root_y, pos[1] - root_x))
+                end
+            else
+                rotation = map(pos -> pos[1], label_points)
             end
-            lalign = map(label_points) do pos
-                cos(pos[1]) > 0.0 ? (:left, :center) : (:right, :center)
+        elseif lrot === :aligned
+            if is_unrooted && !isnothing(branch_angles)
+                # Align with branch angle, flip text on left half so it reads left-to-right
+                rotation = map(branch_angles) do θ
+                    cos(θ) >= 0.0 ? θ : θ + Float32(π)
+                end
+                lalign = map(branch_angles) do θ
+                    cos(θ) >= 0.0 ? (:left, :center) : (:right, :center)
+                end
+            else
+                rotation = map(label_points) do pos
+                    cos(pos[1]) > 0.0 ? pos[1] : pos[1] + pi
+                end
+                lalign = map(label_points) do pos
+                    cos(pos[1]) > 0.0 ? (:left, :center) : (:right, :center)
+                end
             end
         else
             rotation = lrot
@@ -515,7 +652,11 @@ function Makie.plot!(plt::TreeLabels)
 
         # Compute label offsets in pixel space either in polar or cartisian coordinates
         offset = if loffset === automatic
-            if tf isa Polar && torientation in (:right, :out)
+            if is_unrooted && !isnothing(branch_angles)
+                map(branch_angles) do θ
+                    (5.0f0 * cos(θ), 5.0f0 * sin(θ))
+                end
+            elseif tf isa Polar && torientation in (:right, :out)
                 map((θ)->(5*cos(θ), 5*sin(θ)), first.(label_points))
             elseif tf isa Polar && torientation in (:left, :in)
                 map((θ)->(-5*cos(θ), -5*sin(θ)), first.(label_points))
@@ -593,6 +734,15 @@ fig
     """
     cladelabels = nothing
 
+    "Branch geometry from the parent tree plot. Forwarded automatically from `treeplot`."
+    branchsegments = nothing
+
+    "Tree root node. Forwarded automatically from `treeplot`."
+    tree = nothing
+
+    "Layout style of the parent tree plot. Forwarded automatically from `treeplot`."
+    treelayoutstyle = :dendrogram
+
     # Line options
     """
     Offset in data space at which to draw the line indicating the clade being labeled.
@@ -620,16 +770,146 @@ end
 
 _unzip(a) = collect(getfield.(a, fld) for fld in fieldnames(eltype(a)))
 
+function _minimum_angular_span(points, center)
+    angles = Float32[]
+    for point in points
+        dx = point[1] - center[1]
+        dy = point[2] - center[2]
+        iszero(dx) && iszero(dy) && continue
+        push!(angles, mod(Float32(atan(dy, dx)), 2.0f0 * Float32(π)))
+    end
+    isempty(angles) && return (0.0f0, 0.0f0)
+    length(angles) == 1 && return (only(angles), 0.0f0)
+
+    sort!(angles)
+    largest_gap, gap_index = findmax(eachindex(angles)) do index
+        next_angle = index == lastindex(angles) ? first(angles) + 2.0f0 * Float32(π) : angles[index + 1]
+        next_angle - angles[index]
+    end
+    start_index = gap_index == lastindex(angles) ? firstindex(angles) : gap_index + 1
+    return (angles[start_index], 2.0f0 * Float32(π) - largest_gap)
+end
+
+function _terminal_branch_rays(nodepoints, branchsegments, tree, node)
+    parent_of = Dict{Any,Any}()
+    for parent_node in PreOrderDFS(tree)
+        for child in children(parent_node)
+            parent_of[child] = parent_node
+        end
+    end
+
+    segment_by_node = if isnothing(branchsegments)
+        Dict{Any,Any}()
+    else
+        Dict(
+            full_tree_node => segment for
+                (full_tree_node, segment) in zip(PreOrderDFS(tree), branchsegments)
+        )
+    end
+
+    rays = Tuple{Point2f,Point2f}[]
+    for leaf in Iterators.filter(BasicTreePlots.isleaf, PreOrderDFS(node))
+        segment = get(segment_by_node, leaf, ())
+        finite_segment = Point2f[Point2f(point) for point in segment if all(isfinite, point)]
+        if length(finite_segment) >= 2
+            ray_origin = finite_segment[end - 1]
+            ray_tip = finite_segment[end]
+        elseif haskey(parent_of, leaf)
+            ray_origin = nodepoints[parent_of[leaf]]
+            ray_tip = nodepoints[leaf]
+        else
+            continue
+        end
+
+        direction = ray_tip - ray_origin
+        direction_norm = hypot(direction[1], direction[2])
+        iszero(direction_norm) && continue
+        push!(rays, (ray_tip, direction / direction_norm))
+    end
+
+    if isempty(rays)
+        clade_center = nodepoints[node]
+        tree_center = nodepoints[tree]
+        direction = clade_center - tree_center
+        direction_norm = hypot(direction[1], direction[2])
+        unit_direction = iszero(direction_norm) ? Point2f(1, 0) : direction / direction_norm
+        push!(rays, (clade_center, unit_direction))
+    end
+    return rays
+end
+
+function _ray_circle_intersection(ray_origin, ray_direction, center, radius)
+    relative_origin = ray_origin - center
+    projection = relative_origin[1] * ray_direction[1] + relative_origin[2] * ray_direction[2]
+    discriminant = max(
+        projection^2 + radius^2 - relative_origin[1]^2 - relative_origin[2]^2,
+        0.0f0,
+    )
+    ray_distance = -projection + sqrt(discriminant)
+    return ray_origin + ray_distance * ray_direction
+end
+
+function _unrooted_clade_label_geometry(
+        points,
+        rays,
+        clade_center,
+        lineoffset,
+        linepadding,
+        lineresolution,
+        labelrotation,
+    )
+    clade_radius = maximum(points) do point
+        hypot(point[1] - clade_center[1], point[2] - clade_center[2])
+    end
+    radius_tolerance = sqrt(eps(Float32)) * max(Float32(clade_radius), 1.0f0)
+    line_radius = max(Float32(clade_radius + lineoffset), Float32(clade_radius) + radius_tolerance)
+    boundary_points = Point2f[
+        _ray_circle_intersection(ray_origin, ray_direction, clade_center, line_radius) for
+            (ray_origin, ray_direction) in rays
+    ]
+
+    start_angle, angular_width = _minimum_angular_span(boundary_points, clade_center)
+    angular_padding = Float32(linepadding / line_radius)
+    start_angle -= angular_padding
+    angular_width = max(angular_width + 2.0f0 * angular_padding, 0.0f0)
+    stop_angle = start_angle + angular_width
+
+    line_points = Point2f[
+        clade_center + line_radius * Point2f(cos(angle), sin(angle)) for
+            angle in range(start_angle, stop_angle; length = lineresolution)
+    ]
+    push!(line_points, Point2f(NaN, NaN))
+
+    label_angle = start_angle + angular_width / 2.0f0
+    label_position =
+        clade_center + line_radius * Point2f(cos(label_angle), sin(label_angle))
+    rotation = mod(
+        Float32(label_angle + labelrotation) + Float32(π) / 2,
+        Float32(π),
+    ) - Float32(π) / 2
+    return line_points, label_position, rotation
+end
+
 # I think this covers the main ways of calling the functions with a treeplot directly
-treecladelabel!(plt::TreePlot; kwargs...) = treecladelabel!(plt.nodepoints; kwargs...)
-treecladelabel(plt::TreePlot; kwargs...) = treecladelabel(plt.nodepoints; kwargs...)
+_treecladelabel_kwargs(plt::TreePlot) = (;
+    branchsegments = plt.branchsegments,
+    tree = plt.tree,
+    treelayoutstyle = plt.layoutstyle,
+)
+treecladelabel!(plt::TreePlot; kwargs...) =
+    treecladelabel!(plt.nodepoints; _treecladelabel_kwargs(plt)..., kwargs...)
+treecladelabel(plt::TreePlot; kwargs...) =
+    treecladelabel(plt.nodepoints; _treecladelabel_kwargs(plt)..., kwargs...)
 treecladelabel!(ax::Union{Makie.Block,Makie.GridPosition}, plt::TreePlot; kwargs...) =
-    treecladelabel!(ax, plt.nodepoints; kwargs...)
+    treecladelabel!(ax, plt.nodepoints; _treecladelabel_kwargs(plt)..., kwargs...)
 treecladelabel(ax::Union{Makie.Block,Makie.GridPosition}, plt::TreePlot; kwargs...) =
-    treecladelabel(ax, plt.nodepoints; kwargs...)
+    treecladelabel(ax, plt.nodepoints; _treecladelabel_kwargs(plt)..., kwargs...)
 function Makie.plot!(plt::TreeCladeLabel)
     inputs = [
         :nodepoints,
+        :branchsegments,
+        :tree,
+        :treelayoutstyle,
         :cladelabels,
         :lineoffset,
         :linepadding,
@@ -641,12 +921,24 @@ function Makie.plot!(plt::TreeCladeLabel)
         plt.attributes,
         inputs,
         [:line_points, :label_position, :label_text, :rotation],
-    ) do nodepoints, cladelabels, lineoffset, linepadding, lineresolution, labelrotation, tf
+    ) do nodepoints,
+    branchsegments,
+    tree,
+    treelayoutstyle,
+    cladelabels,
+    lineoffset,
+    linepadding,
+    lineresolution,
+    labelrotation,
+    tf
+        is_unrooted = treelayoutstyle in BasicTreePlots.UNROOTED_LAYOUTS
+        if isnothing(tree)
+            tree = is_unrooted ? first(keys(nodepoints)) : first(last(nodepoints))
+        end
 
         ## Default to labeling whole tree
         cladelabels = if isnothing(cladelabels)
-            root = first(last(nodepoints))
-            [root => BasicTreePlots.label(root)]
+            [tree => BasicTreePlots.label(tree)]
         else
             cladelabels
         end
@@ -657,6 +949,22 @@ function Makie.plot!(plt::TreeCladeLabel)
         ## For each clade => cladelabel
         line_points, label_positions, labels, rotation =
             map(zip(collect(cladelabels), lineoffset)) do ((node, label), loff)
+                if is_unrooted
+                    points = _unrooted_clade_geometry(nodepoints, branchsegments, tree, node)
+                    rays = _terminal_branch_rays(nodepoints, branchsegments, tree, node)
+                    line_points, label_position, rotation =
+                        _unrooted_clade_label_geometry(
+                            points,
+                            rays,
+                            nodepoints[node],
+                            loff,
+                            linepadding,
+                            lineresolution,
+                            labelrotation,
+                        )
+                    return line_points, label_position, label, rotation
+                end
+
                 ## Get bounding box coordinates
                 amin, amax = extrema(n -> first(nodepoints[n]), PreOrderDFS(node))
                 bmin, bmax = extrema(n -> last(nodepoints[n]), PreOrderDFS(node))
@@ -725,6 +1033,15 @@ fig
     """
     nodes = nothing
 
+    "Branch geometry from the parent tree plot. Forwarded automatically from `treeplot`."
+    branchsegments = nothing
+
+    "Tree root node. Forwarded automatically from `treeplot`."
+    tree = nothing
+
+    "Layout style of the parent tree plot. Forwarded automatically from `treeplot`."
+    treelayoutstyle = :dendrogram
+
     # Fill
     """
     Padding value to expand region around clade. Expects `(root_edge, leave_edge, first_leaf_edge, last_leaf_edge)`.
@@ -734,8 +1051,8 @@ fig
     """
     padding = 0.1f0
     """
-       Sets the color of the tree area.
-       """
+    Sets the color of the tree area.
+    """
     color = @inherit patchcolor
     """
        Sets the alpha value of the shaded region in the tree area.
@@ -765,27 +1082,165 @@ fig
     Makie.mixin_generic_plot_attributes()...
 end
 
+function _convex_hull(points)
+    hull_points = unique(Point2f.(points))
+    length(hull_points) <= 1 && return hull_points
+    sort!(hull_points; by = point -> (point[1], point[2]))
+
+    cross(origin, a, b) =
+        (a[1] - origin[1]) * (b[2] - origin[2]) -
+        (a[2] - origin[2]) * (b[1] - origin[1])
+
+    lower = Point2f[]
+    for point in hull_points
+        while length(lower) >= 2 && cross(lower[end - 1], lower[end], point) <= 0
+            pop!(lower)
+        end
+        push!(lower, point)
+    end
+
+    upper = Point2f[]
+    for point in Iterators.reverse(hull_points)
+        while length(upper) >= 2 && cross(upper[end - 1], upper[end], point) <= 0
+            pop!(upper)
+        end
+        push!(upper, point)
+    end
+
+    pop!(lower)
+    pop!(upper)
+    return append!(lower, upper)
+end
+
+function _arc_points(center, radius, start_angle, end_angle, resolution)
+    while end_angle < start_angle
+        end_angle += 2.0f0 * Float32(π)
+    end
+    return Point2f[
+        center + radius * Point2f(cos(angle), sin(angle)) for
+            angle in range(start_angle, end_angle; length = max(resolution, 2) + 1)
+    ]
+end
+
+function _rounded_hull(hull, padding, resolution)
+    coordinate_scale = maximum(point -> max(abs(point[1]), abs(point[2])), hull; init = 1.0f0)
+    radius = max(Float32(padding), sqrt(eps(Float32)) * coordinate_scale)
+
+    if length(hull) == 1
+        center = only(hull)
+        angles = range(0.0f0, 2.0f0 * Float32(π); length = max(resolution, 3) + 1)
+        return Point2f[
+            center + radius * Point2f(cos(angle), sin(angle)) for angle in angles
+        ]
+    elseif length(hull) == 2
+        first_point, last_point = hull
+        dx = last_point[1] - first_point[1]
+        dy = last_point[2] - first_point[2]
+        segment_length = hypot(dx, dy)
+        iszero(segment_length) && return _rounded_hull(hull[begin:begin], padding, resolution)
+        segment_angle = Float32(atan(dy, dx))
+        first_arc = _arc_points(
+            last_point,
+            radius,
+            segment_angle - Float32(π) / 2,
+            segment_angle + Float32(π) / 2,
+            resolution,
+        )
+        last_arc = _arc_points(
+            first_point,
+            radius,
+            segment_angle + Float32(π) / 2,
+            segment_angle + 3.0f0 * Float32(π) / 2,
+            resolution,
+        )
+        return append!(first_arc, last_arc)
+    end
+
+    expanded = Point2f[]
+    for index in eachindex(hull)
+        previous = hull[mod1(index - 1, length(hull))]
+        vertex = hull[index]
+        following = hull[mod1(index + 1, length(hull))]
+
+        previous_dx = vertex[1] - previous[1]
+        previous_dy = vertex[2] - previous[2]
+        following_dx = following[1] - vertex[1]
+        following_dy = following[2] - vertex[2]
+        previous_length = hypot(previous_dx, previous_dy)
+        following_length = hypot(following_dx, following_dy)
+        previous_normal = Point2f(previous_dy, -previous_dx) / previous_length
+        following_normal = Point2f(following_dy, -following_dx) / following_length
+        start_angle = Float32(atan(previous_normal[2], previous_normal[1]))
+        end_angle = Float32(atan(following_normal[2], following_normal[1]))
+        append!(expanded, _arc_points(vertex, radius, start_angle, end_angle, resolution))
+    end
+    return expanded
+end
+
+function _unrooted_clade_geometry(nodepoints, branchsegments, tree, node)
+    clade_nodes = collect(PreOrderDFS(node))
+    points = Point2f[nodepoints[clade_node] for clade_node in clade_nodes]
+    isnothing(branchsegments) && return points
+
+    segment_by_node = Dict(
+        full_tree_node => segment for
+            (full_tree_node, segment) in zip(PreOrderDFS(tree), branchsegments)
+    )
+    for clade_node in Iterators.drop(clade_nodes, 1)
+        for point in get(segment_by_node, clade_node, ())
+            all(isfinite, point) && push!(points, Point2f(point))
+        end
+    end
+    return points
+end
+
 # I think this covers the main ways of calling the functions with a treeplot directly
-treehilight!(plt::TreePlot; kwargs...) = treehilight!(plt.nodepoints; kwargs...)
-treehilight(plt::TreePlot; kwargs...) = treehilight(plt.nodepoints; kwargs...)
-treehilight!(ax::Union{Makie.Block,Makie.GridPosition}, plt::TreePlot; kwargs...) =
-    treehilight!(ax, plt.nodepoints; kwargs...)
-treehilight(ax::Union{Makie.Block,Makie.GridPosition}, plt::TreePlot; kwargs...) =
-    treehilight(ax, plt.nodepoints; kwargs...)
+_treehilight_kwargs(plt::TreePlot) = (;
+    branchsegments = plt.branchsegments,
+    tree = plt.tree,
+    treelayoutstyle = plt.layoutstyle,
+)
+treehilight!(plt::TreePlot; kwargs...) =
+    treehilight!(plt.nodepoints; _treehilight_kwargs(plt)..., kwargs...)
+treehilight(plt::TreePlot; kwargs...) =
+    treehilight(plt.nodepoints; _treehilight_kwargs(plt)..., kwargs...)
+treehilight!(ax::Union{Makie.Block, Makie.GridPosition}, plt::TreePlot; kwargs...) =
+    treehilight!(ax, plt.nodepoints; _treehilight_kwargs(plt)..., kwargs...)
+treehilight(ax::Union{Makie.Block, Makie.GridPosition}, plt::TreePlot; kwargs...) =
+    treehilight(ax, plt.nodepoints; _treehilight_kwargs(plt)..., kwargs...)
 function Makie.plot!(plt::TreeHilight)
     map!(
         plt.attributes,
-        [:nodepoints, :nodes, :resolution, :padding, :transform_func],
+        [
+            :nodepoints,
+            :branchsegments,
+            :tree,
+            :treelayoutstyle,
+            :nodes,
+            :resolution,
+            :padding,
+            :transform_func,
+        ],
         [:clade_regions],
-    ) do nodepoints, nodes, resolution, padding, tf
+    ) do nodepoints, branchsegments, tree, treelayoutstyle, nodes, resolution, padding, tf
 
         # if no nodes provided use root
-        nodes = isnothing(nodes) ? [first(last(nodepoints))] : nodes
+        is_unrooted = treelayoutstyle in BasicTreePlots.UNROOTED_LAYOUTS
+        if isnothing(tree)
+            tree = is_unrooted ? first(keys(nodepoints)) : first(last(nodepoints))
+        end
+        nodes = isnothing(nodes) ? [tree] : nodes
 
         # expand padding to root, leaves, leftwidth, rightwidth directions
         padding = Makie.to_lrbt_padding(padding)
 
         clade_regions = map(nodes) do node
+            if is_unrooted
+                points = _unrooted_clade_geometry(nodepoints, branchsegments, tree, node)
+                hull = _convex_hull(points)
+                radial_padding = maximum(padding)
+                return Polygon(_rounded_hull(hull, radial_padding, resolution))
+            end
 
             ## Get bounding box coordinates
             amin, amax = extrema(n -> first(nodepoints[n]), PreOrderDFS(node))
@@ -802,24 +1257,22 @@ function Makie.plot!(plt::TreeHilight)
 
             clade_region = Point2f[
                 (depthmin, widthmin),
-                ((depthmin, i) for i ∈ range(widthmin, widthmax, resolution))...,
+                ((depthmin, i) for i in range(widthmin, widthmax, resolution))...,
                 (depthmin, widthmax),
                 (depthmax, widthmax),
-                ((depthmax, i) for i ∈ range(widthmax, widthmin, resolution))...,
+                ((depthmax, i) for i in range(widthmax, widthmin, resolution))...,
                 (depthmax, widthmin),
                 (depthmin, widthmin),
             ]
-            clade_region =
-                tf isa Polar ? Polygon(reverse.(clade_region)) : Polygon(clade_region)
-            return clade_region
+            return tf isa Polar ? Polygon(reverse.(clade_region)) : Polygon(clade_region)
         end
         clade_regions = length(clade_regions) == 1 ? only(clade_regions) : clade_regions
         return (clade_regions,)
     end
 
 
-    p = Makie.poly!(plt, plt.attributes, plt.clade_regions;)
-    Makie.translate!(p, 0, 0, plt.z_shift[])
+    p = Makie.poly!(plt, plt.attributes, plt.clade_regions)
+    return Makie.translate!(p, 0, 0, plt.z_shift[])
 end
 
 # # themes ======================================================================================
