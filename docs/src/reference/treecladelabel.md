@@ -34,6 +34,36 @@ treecladelabel!(tp; cladelabels=[tree => BasicTreePlots.label(tree), (:a, :b) =>
 fig
 ```
 
+## Unrooted label rotation
+
+For unrooted layouts, `labelrotation` is relative to the radial direction. A value of `0`
+is radial and the default `pi / 2` is tangent to the clade arc. Rotations are not folded
+into a 180-degree range, so adding `pi` reverses the text direction.
+
+```@figure treecladelabel
+rotations = (0, 90, 180, 270)
+tree = ((:a, :b), (:c, :d))
+fig = Figure(size = (900, 240))
+for (column, degrees) in enumerate(rotations)
+    ax = Axis(
+        fig[1, column];
+        title = "$(degrees)°",
+        aspect = DataAspect(),
+        xautolimitmargin = (0.2, 0.2),
+        yautolimitmargin = (0.2, 0.5),
+    )
+    hidedecorations!(ax)
+    hidespines!(ax)
+    tp = treeplot!(ax, tree; layoutstyle = :unrooted_cladogram)
+    treecladelabel!(
+        tp;
+        cladelabels = [tree[1] => "clade"],
+        labelrotation = deg2rad(degrees),
+    )
+end
+fig
+```
+
 ## Clade Label text styling
 
 ```@figure treecladelabel

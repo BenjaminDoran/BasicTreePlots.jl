@@ -153,6 +153,25 @@ hidedecorations!(ax)
 fig
 ```
 
+## rotation
+
+For unrooted and daylight layouts, `rotation` rotates the whole tree counterclockwise by the given angle in radians.
+The default is `0`.
+
+```@figure treeplot
+fig = Figure(size = (600, 300))
+for (column, angle) in enumerate((0, π / 2))
+    ax = Axis(fig[1, column]; aspect = DataAspect(), title = "rotation = $(angle)")
+    tp = treeplot!(ax, tree; layoutstyle = :unrooted_cladogram, rotation = angle)
+    treelabels!(tp)
+    hidedecorations!(ax)
+end
+fig
+```
+
+The rotated coordinates are passed to `treescatter`, `treelabels`, `treecladelabel`, and `treehilight`
+when those functions receive the `TreePlot`. Rooted layouts ignore `rotation`.
+
 ## branchcolor & branchwidth
 
 Can be either a single color `:black`, color plus alpha transperency `(:black, 0.5)`,
