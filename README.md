@@ -45,7 +45,7 @@ tree = ((:a, :b), (:c, :d))
 treeplot(tree)
 ```
 
-See [Documentation](https://BenjaminDoran.github.io/BasicTreePlots.jl/stable) for more details.
+See [Documentation](https://BenjaminDoran.github.io/BasicTreePlots.jl/dev) for more details.
 
 ## How to Cite
 
