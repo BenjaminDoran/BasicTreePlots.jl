@@ -29,10 +29,10 @@ for (column, degrees) in enumerate(rotations)
         labelrotation = deg2rad(degrees),
     )
 end
-fig</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">┌ Warning: Assignment to `ax` in soft scope is ambiguous because a global variable by the same name exists: `ax` will be treated as a new local. Disambiguate by using `local ax` to suppress this warning or `global ax` to assign to the existing global variable.
-└ @ treecladelabel.md:7
-┌ Warning: Assignment to `tp` in soft scope is ambiguous because a global variable by the same name exists: `tp` will be treated as a new local. Disambiguate by using `local tp` to suppress this warning or `global tp` to assign to the existing global variable.
-└ @ treecladelabel.md:16</code></pre><img src="../91d1f9e.png" width="900px" height="240px"/><h2 id="Clade-Label-text-styling"><a class="docs-heading-anchor" href="#Clade-Label-text-styling">Clade Label text styling</a><a id="Clade-Label-text-styling-1"></a><a class="docs-heading-anchor-permalink" href="#Clade-Label-text-styling" title="Permalink"></a></h2><pre><code class="language-julia hljs">tree = ((:a, :b), (:c, (:d, :e)))
+fig</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi"><span class="sgr33"><span class="sgr1">┌ Warning: </span></span>Assignment to `ax` in soft scope is ambiguous because a global variable by the same name exists: `ax` will be treated as a new local. Disambiguate by using `local ax` to suppress this warning or `global ax` to assign to the existing global variable.
+<span class="sgr33"><span class="sgr1">└ </span></span><span class="sgr90">@ treecladelabel.md:7</span>
+<span class="sgr33"><span class="sgr1">┌ Warning: </span></span>Assignment to `tp` in soft scope is ambiguous because a global variable by the same name exists: `tp` will be treated as a new local. Disambiguate by using `local tp` to suppress this warning or `global tp` to assign to the existing global variable.
+<span class="sgr33"><span class="sgr1">└ </span></span><span class="sgr90">@ treecladelabel.md:16</span></code></pre><img src="../91d1f9e.png" width="900px" height="240px"/><h2 id="Clade-Label-text-styling"><a class="docs-heading-anchor" href="#Clade-Label-text-styling">Clade Label text styling</a><a id="Clade-Label-text-styling-1"></a><a class="docs-heading-anchor-permalink" href="#Clade-Label-text-styling" title="Permalink"></a></h2><pre><code class="language-julia hljs">tree = ((:a, :b), (:c, (:d, :e)))
 fig, ax, tp = treeplot(tree, axis=(; xautolimitmargin=(0.05, 0.4)))
 treecladelabel!(tp;
     cladelabels=[tree =&gt; BasicTreePlots.label(tree), (:a, :b) =&gt; &quot;Clade 1&quot;],
